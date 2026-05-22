@@ -18,46 +18,6 @@
   <script src="physics.js"></script>
   <script src="draw.js"></script>
   <script src="main.js"></script>
-
-  <script>
-    let score = 0;
-    let startTime = performance.now();
-
-    let state = {
-        x: 250,     // global x position [pixels]
-        y: 150,     // global y position [pixels]
-        z: 120,     // global z posiion [pixels]
-        u: 0,       // surge velocity [m/s]
-        w: 0,       // heave velocity [m/s]
-        r: 0,       // yaw velocity [rad/s]
-        psi: 0,     // heading [rad]
-    };
-
-    const keys = {
-        up: false,
-        down: false,
-        left: false,
-        right: false,
-    };
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'ArrowUp') keys.up = true;
-        if (e.key === 'ArrowDown') keys.down = true;
-        if (e.key === 'ArrowLeft') keys.left = true;
-        if (e.key === 'ArrowRight') keys.right = true;
-        e.preventDefault();
-    });
-
-    document.addEventListener('keyup', function(e) {
-        if (e.key === 'ArrowUp') keys.up = false;
-        if (e.key === 'ArrowDown') keys.down = false;
-        if (e.key === 'ArrowLeft') keys.left = false;
-        if (e.key === 'ArrowRight') keys.right = false;
-    });
-
-    let target = newTarget();
-    requestAnimationFrame(draw);
-</script>
 </body>
 
 <footer>
