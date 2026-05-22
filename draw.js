@@ -1,46 +1,14 @@
-const canvasTop  = document.getElementById('cvTop');
-const ctxTop     = canvasTop.getContext('2d');
-const canvasSide = document.getElementById('cvSide');
-const ctxSide    = canvasSide.getContext('2d');
+export const canvasTop = document.getElementById('cvTop');
+export const ctxTop = canvasTop.getContext('2d');
+export const canvasSide = document.getElementById('cvSide');
+export const ctxSide = canvasSide.getContext('2d');
 
 // Simulate 2D motion
-function draw() {
-    // R
-    const F1 = keys.right ? P.F_step : 0;
-    const F2 = keys.left ? P.F_step : 0;
-
-    const Fz = (keys.up ? 1 : 0) - (keys.down ? 1 : 0);
-    
-    const inp = {
-        Fx: F1 + F2,
-        Mz: (F1 - F2) * P.ly,
-        Fz: Fz * P.F_vert,
-    };
-
-    // Compute state
-    state = rk4(state, inp, 0.025);
-
-    // clamp to canvas bounds
-    state.x = Math.max(55, Math.min(canvasTop.width  - 55, state.x));
-    state.y = Math.max(22, Math.min(canvasTop.height - 22, state.y));
-    state.z = Math.max(22, Math.min(canvasSide.height - 22, state.z));
-
-    // Display state visually
+export function draw(state, target, score, timerStarted, startTime) {
     const x = state.x;
     const y = state.y;
     const z = state.z;
     const angle = state.psi;
-
-    // Check if captured
-    const dx = target.x - x;
-    const dy = target.y - y;
-    const dz = target.z - z;
-
-    const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
-    if (dist < 30) {
-        score++;
-        target = newTarget();
-    }      
 
     // CLEAR CANVAS
     ctxTop.fillStyle = 'black';
@@ -49,13 +17,11 @@ function draw() {
     ctxSide.fillStyle = 'black';
     ctxSide.fillRect(0, 0, canvasSide.width, canvasSide.height);
 
-    const started = timerStarted;
-    const time = startTime;
     // TIMER
-    drawTimer(started, time);
+    drawTimer(timerStarted, startTime, score);
 
     // TARGET
-    drawTarget();
+    drawTarget(target);
 
     // BLIMP
     ctxTop.save();
@@ -80,7 +46,7 @@ function draw() {
     const visibleLength = Math.abs(Math.cos(angle)) * 55 + Math.abs(Math.sin(angle)) * 22;
 
     ctxSide.save();
-    ctxSide.translate(x, z);
+    ctxSide.translate(x, canvasSide.height - z);
     ctxSide.beginPath();
     ctxSide.ellipse(0, 0, visibleLength, 22, 0, 0, Math.PI * 2);
     ctxSide.fillStyle = '#209148';
@@ -91,11 +57,14 @@ function draw() {
 
     drawDetailsSide(angle);
     ctxSide.restore();
-
-    requestAnimationFrame(draw);
 }
 
-function drawTimer(timerStarted, startTime) {
+function drawTop() {
+    ctxTop.fillStyle = 'black';
+    ctxTop.fillRect(0, 0, canvasTop.width, canvasTop.height);
+}
+
+function drawTimer(timerStarted, startTime, score) {
     // BACKGROUND
     ctxTop.fillStyle = 'rgba(0, 0, 0, 0.4)';
     ctxTop.fillRect(canvasTop.width/2 - 45, 12, 90, 28);
@@ -126,7 +95,7 @@ function drawTimer(timerStarted, startTime) {
     }
 }
 
-function drawTarget() {
+function drawTarget(target) {
     ctxTop.beginPath();
     ctxTop.arc(target.x, target.y, 30, 0, Math.PI * 2);
     ctxTop.strokeStyle = '#ffd426';
@@ -203,7 +172,7 @@ function drawDetailsSide(angle) {
     const tailX = -Math.cos(angle) * 55;  // tail migrates left/right as blimp turns
     const noseX =  Math.cos(angle) * 48;  // nose highlight migrates opposite direction
 
-    const vl = Math.cos(angle) * 55;  // signed — negative when facing left
+    const vl = Math.cos(angle) * 55;  // negative when facing left
 
     // Draw front-face highlight as the right half of the projected ellipse
     ctxSide.beginPath();
@@ -219,11 +188,11 @@ function drawDetailsSide(angle) {
     // ctxSide.fillStyle = '#ccffcc';
     // ctxSide.fill();
 
-    // Top fin — fixed to tail, always sticks straight up
+    // Top finL fixed to tail, always sticks straight up
     ctxSide.beginPath();
-    ctxSide.moveTo(tailX,       -16);
-    ctxSide.lineTo(tailX - 10,  -42);
-    ctxSide.lineTo(tailX + 10,  -10);
+    ctxSide.moveTo(tailX, -16);
+    ctxSide.lineTo(tailX - 10, -42);
+    ctxSide.lineTo(tailX + 10, -10);
     ctxSide.closePath();
     ctxSide.fillStyle = '#0e4020';
     ctxSide.fill();
@@ -231,13 +200,13 @@ function drawDetailsSide(angle) {
     ctxSide.lineWidth = 1;
     ctxSide.stroke();
 
-    // Horizontal tail fin — fixed to tail, stays flat
+    // Horizontal tail fin: fixed to tail, stays flat
     ctxSide.beginPath();
-    ctxSide.moveTo(tailX,      0);
+    ctxSide.moveTo(tailX, 0);
     ctxSide.lineTo(tailX - 20, 0);
-    ctxSide.lineTo(tailX,     -2);
+    ctxSide.lineTo(tailX, -2);
     ctxSide.moveTo(tailX - 20, 0);
-    ctxSide.lineTo(tailX,      2);
+    ctxSide.lineTo(tailX, 2);
     ctxSide.strokeStyle = '#2bff7e';
     ctxSide.lineWidth = 1.5;
     ctxSide.stroke();
