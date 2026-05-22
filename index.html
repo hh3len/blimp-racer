@@ -10,36 +10,27 @@
   <h1>AMASS AIRSHIP // INTERACTIVE SIM</h1>
 
   <!-- Top down view of blimp (X-Y) -->
-  <canvas id="cvTop"  width="1000" height="600" style="border: 1px solid green;"></canvas>
+  <canvas id="cvTop"  width="500" height="300" style="border: 1px solid green;"></canvas>
+  <br>
+  <!-- Side view of blimp (X-Z) -->
+  <canvas id="cvSide"  width="500" height="300" style="border: 1px solid green;"></canvas>
+
+  <script src="physics.js"></script>
+  <script src="draw.js"></script>
+  <script src="main.js"></script>
 
   <script>
-    const canvas = document.getElementById('cvTop');
-    const ctx = canvas.getContext('2d');
-
     let score = 0;
     let startTime = performance.now();
 
-    // 2D state to start
     let state = {
-        x: 500,     // global x position [pixels]
-        y: 300,     // global y position [pixels]
+        x: 250,     // global x position [pixels]
+        y: 150,     // global y position [pixels]
+        z: 120,     // global z posiion [pixels]
         u: 0,       // surge velocity [m/s]
+        w: 0,       // heave velocity [m/s]
         r: 0,       // yaw velocity [rad/s]
         psi: 0,     // heading [rad]
-    };
-
-    /* Constants from:
-    * Sponaugle, Austin Lane, "Reactive Model-Free Control for Underactuated Vehicles Operating in Resource-Constrained Environments" (2025). 
-    * Graduate Theses, Dissertations, and Problem Reports. 12996. https://researchrepository.wvu.edu/etd/12996
-    */
-    const P = {
-        m_surge: 0.5691, // effective surge mass [kg]
-        Iz:      0.1070, // effective yaw inertia [kg*m^2]
-        Xu:      0.1900, // surge damping [kg/s]
-        Nr:      0.2450, // yaw damping [kg*m^2/s]
-        ly:      0.461, // lateral motor moment arm [m]
-        F_step:  0.40, // lateral force per key press [N]
-        SCALE:   120, // conversion for pixels per meter
     };
 
     const keys = {
@@ -50,213 +41,27 @@
     };
 
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'ArrowUp')    keys.up    = true;
-        if (e.key === 'ArrowDown')  keys.down  = true;
-        if (e.key === 'ArrowLeft')  keys.left  = true;
+        if (e.key === 'ArrowUp') keys.up = true;
+        if (e.key === 'ArrowDown') keys.down = true;
+        if (e.key === 'ArrowLeft') keys.left = true;
         if (e.key === 'ArrowRight') keys.right = true;
         e.preventDefault();
     });
 
     document.addEventListener('keyup', function(e) {
-        if (e.key === 'ArrowUp')    keys.up    = false;
-        if (e.key === 'ArrowDown')  keys.down  = false;
-        if (e.key === 'ArrowLeft')  keys.left  = false;
+        if (e.key === 'ArrowUp') keys.up = false;
+        if (e.key === 'ArrowDown') keys.down = false;
+        if (e.key === 'ArrowLeft') keys.left = false;
         if (e.key === 'ArrowRight') keys.right = false;
     });
 
-    // Generate & define random target
-    function newTarget() {
-        return {
-            x: Math.random() * 500 + 50,
-            y: Math.random() * 200 + 50,
-        };
-    }
-
     let target = newTarget();
-
-    // Compute rates of change for each state variable
-    // du (surge acceleration) = (thrust - drag) / mass
-    // dr (yaw acceleration)   = (torque - drag) / inertia
-    // dpsi (heading rate of change)     = yaw velocity
-    // dx (global X velocity)  = surge * cos(heading)
-    // dy (global Y velocity)  = surge * sin(heading)
-    function derivatives(s, inp) {
-        return {
-            du:   (inp.Fx - P.Xu * s.u) / P.m_surge,
-            dr:   (inp.Mz - P.Nr * s.r) / P.Iz,
-            dpsi: s.r, 
-            dx:   s.u * Math.cos(s.psi) * P.SCALE,
-            dy:   s.u * Math.sin(s.psi) * P.SCALE,
-        };
-    }
-
-    let rk4_step = 0.025;
-
-    // Runge-Kutta 4th order integrator (RK4)
-    function rk4(s, inp, dt) {
-        const add = (s, d, t) => ({
-            ...s,
-            u:   s.u   + t * d.du,
-            r:   s.r   + t * d.dr,
-            psi: s.psi + t * d.dpsi,
-            x:   s.x   + t * d.dx,
-            y:   s.y   + t * d.dy,
-        });
-        
-        const k1 = derivatives(s, inp);
-        const k2 = derivatives(add(s, k1, rk4_step/2), inp);
-        const k3 = derivatives(add(s, k2, rk4_step/2), inp);
-        const k4 = derivatives(add(s, k3, rk4_step),   inp);
-
-        return add(s, {
-            du:   (k1.du   + 2*k2.du   + 2*k3.du   + k4.du)   / 6,
-            dr:   (k1.dr   + 2*k2.dr   + 2*k3.dr   + k4.dr)   / 6,
-            dpsi: (k1.dpsi + 2*k2.dpsi + 2*k3.dpsi + k4.dpsi) / 6,
-            dx:   (k1.dx   + 2*k2.dx   + 2*k3.dx   + k4.dx)   / 6,
-            dy:   (k1.dy   + 2*k2.dy   + 2*k3.dy   + k4.dy)   / 6,
-        }, rk4_step);
-    }
-
-    // Simulate 2D motion
-    function draw() {
-        // R
-        const F1 = keys.right ? P.F_step : 0;
-        const F2 = keys.left ? P.F_step : 0;
-        
-        const inp = {
-            Fx: F1 + F2,
-            Mz: (F1 - F2) * P.ly,
-        };
-
-        // Compute state
-        state = rk4(state, inp, 0.025);
-
-        // Display state visually
-        const x   = state.x;
-        const y   = state.y;
-        const angle = state.psi;
-
-        // Check if captured
-        const dx = target.x - x;
-        const dy = target.y - y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        if (dist < 30) {
-            score++;
-            target = newTarget();
-        }      
-
-        // CLEAR CANVAS
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // TIMER
-        drawTimer();
-
-        // TARGET
-        drawTarget();
-
-        // BLIMP
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(angle);
-
-        // Body
-        ctx.beginPath();
-        ctx.ellipse(0, 0, 55, 22, 0, 0, Math.PI * 2);
-        ctx.fillStyle = '#209148';
-        ctx.fill();
-        ctx.strokeStyle = '#2bff7e';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        drawDetails();
-        ctx.restore();
-
-        requestAnimationFrame(draw);
-    }
-
-    function drawTimer() {
-        // TIMER
-        const elapsed = (performance.now() - startTime) / 1000;
-        const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
-        const ss = String(Math.floor(elapsed % 60)).padStart(2, '0');
-
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-        ctx.fillRect(canvas.width/2 - 45, 12, 90, 28);
-        ctx.fillStyle = '#2bff7e';
-
-        ctx.font = '16px monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText(mm + ':' + ss, canvas.width/2, 32);
-        ctx.textAlign = 'left';
-
-        // SCORE
-        ctx.fillText('SCORE: ' + score, 16, 32);
-    }
-
-    function drawTarget() {
-        ctx.beginPath();
-        ctx.arc(target.x, target.y, 30, 0, Math.PI * 2);
-        ctx.strokeStyle = '#ffd426';
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([4, 4]);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        ctx.beginPath();
-        const ds = 8;
-        ctx.moveTo(target.x,    target.y - ds);
-        ctx.lineTo(target.x + ds, target.y);
-        ctx.lineTo(target.x,    target.y + ds);
-        ctx.lineTo(target.x - ds, target.y);
-        ctx.closePath();
-        ctx.fillStyle = '#ffd426';
-        ctx.fill();
-    }
-
-    function drawDetails() {
-        // Nose highlight (indicates front)
-        ctx.beginPath();
-        ctx.ellipse(0, 0, 55, 22, 0, -Math.PI / 6, Math.PI / 6);
-        ctx.lineTo(48, 0);
-        ctx.closePath();
-        ctx.fillStyle = '#ccffcc';
-        ctx.fill();
-
-        // L/R fins
-        ctx.beginPath();
-        ctx.moveTo(-38, -16);
-        ctx.lineTo(-55, -42);
-        ctx.lineTo(-50, -10);
-        ctx.moveTo(-38, 16);
-        ctx.lineTo(-55, 42);
-        ctx.lineTo(-50, 10);
-        ctx.closePath();
-
-        ctx.fillStyle = '#0e4020';
-        ctx.fill();
-        ctx.strokeStyle = '#2bff7e';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
-        // Top fin
-        ctx.beginPath();
-        ctx.moveTo(-37, 0);
-        ctx.lineTo(-65, 0);
-        ctx.lineTo(-37, -2);
-        ctx.moveTo(-65, 0);
-        ctx.lineTo(-37, 2);
-        ctx.strokeStyle = '#2bff7e';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-    }
-
     requestAnimationFrame(draw);
 </script>
 </body>
 
 <footer>
- <span> AMASS AIRSHIP CONTROL SIM v1.2</span>
+ <span> AMASS AIRSHIP CONTROL SIM v2.1</span>
  <span> H. LING </span>
 </footer>
 
