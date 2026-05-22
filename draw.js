@@ -5,24 +5,57 @@ export const ctxSide = canvasSide.getContext('2d');
 
 // Simulate 2D motion
 export function draw(state, target, score, timerStarted, startTime) {
-    const x = state.x;
-    const y = state.y;
-    const z = state.z;
-    const angle = state.psi;
-
     // CLEAR CANVAS
-    ctxTop.fillStyle = 'black';
-    ctxTop.fillRect(0, 0, canvasTop.width, canvasTop.height);
-
-    ctxSide.fillStyle = 'black';
-    ctxSide.fillRect(0, 0, canvasSide.width, canvasSide.height);
+    let clearCanvas = (canvas) => {
+        canvas.getContext('2d').fillStyle = 'black';
+        canvas.getContext('2d').fillRect(0, 0, canvas.width, canvas.height);
+    };
+    clearCanvas(canvasTop);
+    clearCanvas(canvasSide);
 
     // TIMER
-    drawTimer(timerStarted, startTime, score);
+    drawHeader(ctxTop, timerStarted, startTime, score);
+    drawHeader(ctxSide, timerStarted, startTime, score);
 
     // TARGET
-    drawTarget(target);
+    drawTarg(ctxTop, target.x, target.y);
+    drawTarg(ctxSide, target.x, target.z);
+    
+    // BLIMP
+    // drawBlimp(state.x, state.y, state.z, state.psi);
 
+    drawBody(ctxTop, state.x, state.y, state.psi);
+    drawBody(ctxSide, state.x, state.z, state.psi);
+}
+
+// save current canvas
+// translate
+// rotate IFF xy
+// begin path to draw ellipse
+// drawDetails
+// restore
+
+// Works as intended
+function drawBody(ctx, x, y, psi) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx == ctxTop && ctx.rotate(psi);
+
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 55, 22, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#209148';
+    ctx.fill();
+    ctx.strokeStyle = '#2bff7e';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    drawDetailsTop();
+    drawDetailsSide(psi);
+    ctx.restore();
+}
+
+// Works as intended
+function drawBlimp(x, y, z, angle) {
     // BLIMP
     ctxTop.save();
     ctxTop.translate(x, y);
@@ -59,79 +92,58 @@ export function draw(state, target, score, timerStarted, startTime) {
     ctxSide.restore();
 }
 
-function drawTop() {
-    ctxTop.fillStyle = 'black';
-    ctxTop.fillRect(0, 0, canvasTop.width, canvasTop.height);
-}
-
-function drawTimer(timerStarted, startTime, score) {
-    // BACKGROUND
-    ctxTop.fillStyle = 'rgba(0, 0, 0, 0.4)';
-    ctxTop.fillRect(canvasTop.width/2 - 45, 12, 90, 28);
-
+// Works as intended
+function drawHeader(ctx, timerStarted, startTime, score) {
     // SCORE
-    ctxTop.fillStyle = '#2bff7e';
-    ctxTop.font = '16px monospace';
-    ctxTop.textAlign = 'left';
-    ctxTop.fillText('SCORE: ' + score, 16, 32);
+    ctx.fillStyle = '#2bff7e';
+    ctx.font = '16px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('SCORE: ' + score, 16, 32);
 
     // TIMER DEFAULT DISPLAY
-    ctxTop.textAlign = 'center';
-    ctxTop.fillText('00:00', canvasTop.width/2, 32);
+    ctx.textAlign = 'center';
+    ctx.fillText('00:00', canvasTop.width/2, 32);
 
     // TIMER STARTS
     if (timerStarted) {
         // Clear 00:00 display
-        ctxTop.fillStyle = 'rgb(0, 0, 0)';
-        ctxTop.fillRect(canvasTop.width/2 - 45, 12, 90, 28);
+        ctx.fillStyle = 'rgb(0, 0, 0)';
+        ctx.fillRect(canvasTop.width/2 - 45, 12, 90, 28);
 
         // Calculate current time
         const elapsed = (performance.now() - startTime) / 1000;
         const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
         const ss = String(Math.floor(elapsed % 60)).padStart(2, '0');
         
-        ctxTop.fillStyle = '#2bff7e';
-        ctxTop.fillText(mm + ':' + ss, canvasTop.width/2, 32);
+        ctx.fillStyle = '#2bff7e';
+        ctx.fillText(mm + ':' + ss, canvasTop.width/2, 32);
     }
 }
 
-function drawTarget(target) {
-    ctxTop.beginPath();
-    ctxTop.arc(target.x, target.y, 30, 0, Math.PI * 2);
-    ctxTop.strokeStyle = '#ffd426';
-    ctxTop.lineWidth = 1.5;
-    ctxTop.setLineDash([4, 4]);
-    ctxTop.stroke();
-    ctxTop.setLineDash([]);
+// Works as intended
+function drawTarg(ctx, px, py) {
+    // CIRCLE
+    ctx.beginPath();
+    ctx.strokeStyle = '#ffd426';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5, 5]);
+    ctx.arc(px, py, 30, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
 
-    ctxTop.beginPath();
+    // DIAMOND
     const ds = 8;
-    ctxTop.moveTo(target.x, target.y - ds);
-    ctxTop.lineTo(target.x + ds, target.y);
-    ctxTop.lineTo(target.x, target.y + ds);
-    ctxTop.lineTo(target.x - ds, target.y);
-    ctxTop.closePath();
-    ctxTop.fillStyle = '#ffd426';
-    ctxTop.fill();
+    ctx.beginPath();
+    ctx.moveTo(px, py - ds);
+    ctx.lineTo(px + ds, py);
+    ctx.lineTo(px, py + ds);
+    ctx.lineTo(px - ds, py);
+    ctx.closePath();
+    ctx.fillStyle = '#ffd426';
+    ctx.fill();
+};
 
-    ctxSide.beginPath();
-    ctxSide.arc(target.x, target.z, 30, 0, Math.PI * 2);
-    ctxSide.strokeStyle = '#ffd426';
-    ctxSide.lineWidth = 1.5;
-    ctxSide.setLineDash([4, 4]);
-    ctxSide.stroke();
-    ctxSide.setLineDash([]);
-    
-    ctxSide.beginPath();
-    ctxSide.moveTo(target.x, target.z - ds);
-    ctxSide.lineTo(target.x + ds, target.z);
-    ctxSide.lineTo(target.x, target.z + ds);
-    ctxSide.lineTo(target.x - ds, target.z);
-    ctxSide.closePath();
-    ctxSide.fillStyle = '#ffd426';
-    ctxSide.fill();
-}
-
+// Works as intended
 function drawDetailsTop() {
     // Nose highlight
     ctxTop.beginPath();
@@ -168,6 +180,7 @@ function drawDetailsTop() {
     ctxTop.stroke();
 }
 
+// WIP
 function drawDetailsSide(angle) {
     const tailX = -Math.cos(angle) * 55;  // tail migrates left/right as blimp turns
     const noseX =  Math.cos(angle) * 48;  // nose highlight migrates opposite direction
