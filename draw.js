@@ -306,51 +306,58 @@ function drawDetailsSide(angle) {
     const noseLeftX = noseCenterX - noseRadX;
     const noseRightX = noseCenterX + noseRadX;
 
+    // Clip to blimp!
+    (() => {
+        ctxSide.save();
+        ctxSide.beginPath();
+        ctxSide.ellipse(0, 0, v, 22, 0, 0, Math.PI * 2);
+        ctxSide.clip();
+    })();
+
+    // draw the hull ellipse spanning both shapes
+    const ellipseCenterX = noseLeftX * cos;
+    const circleLeftEdge   = noseCenterX - noseRadX;
+    const circleRightEdge   = noseCenterX + noseRadX;
+    const ellipseLeftEdge  = ellipseCenterX - noseRadY * Math.abs(sin);
+    const ellipseRightEdge  = ellipseCenterX + noseRadY * Math.abs(sin);
+
     // +Y is down (canvas convention), opposite of Cartesian coordinates
     if ((0 <= angle) && (angle <= Math.PI/2)) {
-        drawNose(noseLeftX * Math.cos(angle), 0, noseRadY * Math.sin(angle), noseRadY);
-        drawN2(noseCenterX, noseCenterY, noseRadX, angle);
+        drawEllipse(noseLeftX * Math.cos(angle), 0, noseRadY * Math.sin(angle), noseRadY);
+        drawCircle(noseCenterX, noseCenterY, noseRadX, angle);
+
+        ctxSide.beginPath();
+
+        const hullLeft = Math.min(ellipseLeftEdge, circleLeftEdge);
+        const hullRight = Math.max(ellipseRightEdge, circleRightEdge);
+        const hullCenterX = (hullLeft + hullRight) / 2;
+        const hullRadiusX = (hullRight - hullLeft) / 2;
+
+        console.log("Left: " + hullLeft);
+        console.log("Right: " + hullRight);
+        console.log("Center: " + hullCenterX);
+        console.log("Rad: " + hullRadiusX);
+
+        ctxSide.ellipse(hullCenterX, 0, hullRadiusX, noseRadY, 0, 0, Math.PI * 2);
+        ctxSide.fill();
     } else if ((Math.PI/2 < angle) && (angle <= Math.PI)) {
-        drawNose(-noseRightX * Math.cos(angle), 0, noseRadY * Math.sin(angle), noseRadY, angle);
-        drawN2(noseCenterX, noseCenterY, noseRadX, angle);
+        drawEllipse(-noseRightX * Math.cos(angle), 0, noseRadY * Math.sin(angle), noseRadY, angle);
+        drawCircle(noseCenterX, noseCenterY, noseRadX, angle);
+
+        ctxSide.beginPath();
+        const hullLeft = Math.min(ellipseLeftEdge, circleLeftEdge);
+        const hullRight = Math.max(ellipseRightEdge, circleRightEdge);
+        const hullCenterX = (hullLeft + hullRight) / 2;
+        const hullRadiusX = (hullLeft - hullRight) / 2;
+
+        ctxSide.ellipse(hullCenterX, 0, hullRadiusX, noseRadY, 0, 0, Math.PI * 2);
+        ctxSide.fill();
     }
 
-    // // ------------------- CASES ----------------------
-    // // heading = 0 (right elliptic section)
-    // if (Math.abs(angle) < 0.01) {
-    //     ctxSide.beginPath();
-    //     ctxSide.moveTo(48, 0);
-    //     ctxSide.ellipse(0, 0, 55, 22, 0, -Math.PI/6, Math.PI/6);
-    //     ctxSide.lineTo(48, 0);
-    //     ctxSide.closePath();
-    //     ctxSide.fillStyle = '#ccffcc';
-    //     ctxSide.fill();
-    // }
-
-    // // heading = 90 (circle)
-    // else if (Math.abs(angle - Math.PI/2) < 0.01) {
-    //     ctxSide.beginPath();
-    //     ctxSide.arc(0, 0, 22, 0, Math.PI * 2);
-    //     ctxSide.fillStyle = '#ccffcc';
-    //     ctxSide.fill();
-    // }
-
-    // // heading = 180 (left elliptic section)
-    // else if (Math.abs(Math.abs(angle) - Math.PI) < 0.01) {
-    //     ctxSide.beginPath();
-    //     ctxSide.moveTo(-48, 0);
-    //     ctxSide.ellipse(0, 0, 55, 22, 0, Math.PI - Math.PI/6, Math.PI + Math.PI/6);
-    //     ctxSide.lineTo(-48, 0);
-    //     ctxSide.closePath();
-    //     ctxSide.fillStyle = '#ccffcc';
-    //     ctxSide.fill();
-    // }
-
-    // // heading = -90 (nothing)
-    // else if (Math.abs(angle + Math.PI/2) < 0.01) {}
+    ctxSide.restore();
 }
 
-function drawNose(x, y, a, b) {
+function drawEllipse(x, y, a, b) {
     ctxSide.beginPath();
     ctxSide.ellipse(x, y, a, b, 0, 0, Math.PI * 2);
     ctxSide.closePath();
@@ -360,16 +367,19 @@ function drawNose(x, y, a, b) {
     ctxSide.stroke();
 }
 
-function drawN2(x, y, r, angle) {
-    ctxSide.save();
-    ctxSide.beginPath();
-    ctxSide.ellipse(0, 0, 55 * Math.abs(Math.cos(angle)) + 22 * Math.abs(Math.sin(angle)), 22, 0, 0, Math.PI * 2);
-    ctxSide.clip();
-        
+function drawCircle(x, y, r, angle) {
     ctxSide.beginPath();
     ctxSide.arc(x, y, r, 0, Math.PI * 2);
     ctxSide.closePath();
     ctxSide.fillStyle = '#ccffcc';
     ctxSide.fill();
-    ctxSide.restore();
+
+    const gradient = ctxSide.createConicGradient(0, r, r);
+
+    gradient.addColorStop(0, "#ccffcc");
+    gradient.addColorStop(0.5, "#ffffff");
+    gradient.addColorStop(1, "#ccffcc");
+
+    ctxSide.fillStyle = gradient;
+    ctxSide.fill();
 }
