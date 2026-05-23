@@ -189,6 +189,7 @@ function drawDetailsTop() {
     ctxTop.stroke();
 }
 
+// WIP
 function ds() {
     function projectSide(point, angle) {
         return {
@@ -233,18 +234,18 @@ function ds() {
     }
 
     // nose tip in 3D
-const noseTip = projectSide({ x: 55, y: 0, z: 0 }, angle);
+    const noseTip = projectSide({ x: 55, y: 0, z: 0 }, angle);
 
-// the visible half-length after foreshortening
-const visibleLength = Math.abs(Math.cos(angle)) * 55;
+    // the visible half-length after foreshortening
+    const visibleLength = Math.abs(Math.cos(angle)) * 55;
 
-ctxSide.beginPath();
-ctxSide.moveTo(0, 0);
-ctxSide.ellipse(0, 0, visibleLength, 22, 0, -Math.PI/6, Math.PI/6);
-ctxSide.lineTo(noseTip.px, 0);
-ctxSide.closePath();
-ctxSide.fillStyle = '#ccffcc';
-ctxSide.fill();
+    ctxSide.beginPath();
+    ctxSide.moveTo(0, 0);
+    ctxSide.ellipse(0, 0, visibleLength, 22, 0, -Math.PI/6, Math.PI/6);
+    ctxSide.lineTo(noseTip.px, 0);
+    ctxSide.closePath();
+    ctxSide.fillStyle = '#ccffcc';
+    ctxSide.fill();
 }
 
 function drawDetailsSide(angle) {
@@ -258,82 +259,52 @@ function drawDetailsSide(angle) {
         };
     }
 
-    function drawFin(points) {
-        const p = points.map(([x,y,z]) => project(x, y, z));
-        ctxSide.beginPath();
-        ctxSide.moveTo(p[0].px, p[0].py);
-        ctxSide.lineTo(p[1].px, p[1].py);
-        ctxSide.lineTo(p[2].px, p[2].py);
-        ctxSide.closePath();
-        ctxSide.fillStyle = '#0e4020';
-        ctxSide.fill();
-        ctxSide.strokeStyle = '#2bff7e';
-        ctxSide.lineWidth = 1;
-        ctxSide.stroke();
-    }
+    // function drawFin(points) {
+    //     const p = points.map(([x,y,z]) => project(x, y, z));
+    //     ctxSide.beginPath();
+    //     ctxSide.moveTo(p[0].px, p[0].py);
+    //     ctxSide.lineTo(p[1].px, p[1].py);
+    //     ctxSide.lineTo(p[2].px, p[2].py);
+    //     ctxSide.closePath();
+    //     ctxSide.fillStyle = '#0e4020';
+    //     ctxSide.fill();
+    //     ctxSide.strokeStyle = '#2bff7e';
+    //     ctxSide.lineWidth = 1;
+    //     ctxSide.stroke();
+    // }
 
-    // Left fin — flat in Y (horizontal plane)
-    drawFin([[-38, -16, 0], [-55, -42, 0], [-50, -10, 0]]);
+    // // Left fin — flat in Y (horizontal plane)
+    // drawFin([[-38, -16, 0], [-55, -42, 0], [-50, -10, 0]]);
 
-    // Right fin — mirror of left
-    drawFin([[-38,  16, 0], [-55,  42, 0], [-50,  10, 0]]);
+    // // Right fin — mirror of left
+    // drawFin([[-38,  16, 0], [-55,  42, 0], [-50,  10, 0]]);
 
-    // Top fin — flat in X (vertical plane), always fully visible from side
-    drawFin([[-38, 0, 0], [-55, 0, -30], [-50, 0, -10]]);
+    // // Top fin — flat in X (vertical plane), always fully visible from side
+    // drawFin([[-38, 0, 0], [-55, 0, -30], [-50, 0, -10]]);
 
     // Nose highlight
     const visibleLength = Math.abs(cos) * 55;
     const noseTip = project(55, 0, 0);
-    ctxSide.beginPath();
-    ctxSide.moveTo(0, 0);
-    ctxSide.ellipse(0, 0, visibleLength, 22, 0, -Math.PI/6, Math.PI/6);
-    ctxSide.lineTo(noseTip.px, 0);
+
+    const noseTop = project(55 * Math.cos(Math.PI/6), 22 * Math.sin(Math.PI/6), 0);
+    const noseBot = project(55 * Math.cos(-Math.PI/6), 22 * Math.sin(-Math.PI/6), 0);
+    const noseAvg = (noseTop.px + noseBot.px) / 2;
+
+    // facing right (cos > 0) = positive X
+    // facing left  (cos < 0) = negative X 
+    const noseAngle = cos >= 0 ? 0 : Math.PI;
+  
+    ctxSide.beginPath();    
+    ctxSide.ellipse(0, 0, visibleLength, 22, 0, 
+        noseAngle - Math.PI/6, 
+        noseAngle + Math.PI/6
+    );
+    
+    ctxSide.lineTo(noseAvg, 0);
     ctxSide.closePath();
+
     ctxSide.fillStyle = '#ccffcc';
     ctxSide.fill();
-}
-
-// WIP
-function SIDEEE(angle) {
-    const tailX = -Math.cos(angle) * 55;  // tail migrates left/right as blimp turns
-    const noseX =  Math.cos(angle) * 48;  // nose highlight migrates opposite direction
-
-    const vl = Math.cos(angle) * 55;  // negative when facing left
-
-    // Nose highlight
-    ctxSide.beginPath();
-    ctxSide.ellipse(0, 0, Math.abs(vl), 22, 0, -Math.PI/6, Math.PI/6);
-    ctxSide.fillStyle = '#ccffcc';
-    ctxSide.fill();
-
-    // // Nose highlight slice
-    // ctxSide.beginPath();
-    // ctxSide.ellipse(0, 0, 55, 22, 0, -Math.PI/6, Math.PI/6);
-    // ctxSide.lineTo(48, 0);
-    // ctxSide.closePath();
-    // ctxSide.fillStyle = '#ccffcc';
-    // ctxSide.fill();
-
-    // Top finL fixed to tail, always sticks straight up
-    ctxSide.beginPath();
-    ctxSide.moveTo(tailX, -16);
-    ctxSide.lineTo(tailX - 10, -42);
-    ctxSide.lineTo(tailX + 10, -10);
-    ctxSide.closePath();
-    ctxSide.fillStyle = '#0e4020';
-    ctxSide.fill();
     ctxSide.strokeStyle = '#2bff7e';
-    ctxSide.lineWidth = 1;
-    ctxSide.stroke();
-
-    // Horizontal tail fin: fixed to tail, stays flat
-    ctxSide.beginPath();
-    ctxSide.moveTo(tailX, 0);
-    ctxSide.lineTo(tailX - 20, 0);
-    ctxSide.lineTo(tailX, -2);
-    ctxSide.moveTo(tailX - 20, 0);
-    ctxSide.lineTo(tailX, 2);
-    ctxSide.strokeStyle = '#2bff7e';
-    ctxSide.lineWidth = 1.5;
     ctxSide.stroke();
 }
