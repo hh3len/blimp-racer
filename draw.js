@@ -41,16 +41,20 @@ function drawBody(ctx, x, y, psi) {
     ctx.translate(x, y);
     ctx == ctxTop && ctx.rotate(psi);
 
+    let length = 55;
+    ctx == ctxSide ? length = Math.abs(Math.cos(psi)) * 55 + Math.abs(Math.sin(psi)) * 22 : 55;
+
     ctx.beginPath();
-    ctx.ellipse(0, 0, 55, 22, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, length, 22, 0, 0, Math.PI * 2);
     ctx.fillStyle = '#209148';
     ctx.fill();
     ctx.strokeStyle = '#2bff7e';
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    drawDetailsTop();
-    drawDetailsSide(psi);
+    ctx == ctxTop && drawDetailsTop();
+    ctx == ctxSide && drawDetailsSide(psi);
+
     ctx.restore();
 }
 
@@ -74,7 +78,6 @@ function drawBlimp(x, y, z, angle) {
     ctxTop.restore();
 
     // SIDE VIEW — X horizontal, Z vertical
-
     // Foreshortening!
     const visibleLength = Math.abs(Math.cos(angle)) * 55 + Math.abs(Math.sin(angle)) * 22;
 
@@ -88,7 +91,7 @@ function drawBlimp(x, y, z, angle) {
     ctxSide.lineWidth = 2;
     ctxSide.stroke();
 
-    drawDetailsSide(angle);
+    SIDEEE(angle);
     ctxSide.restore();
 }
 
@@ -147,7 +150,7 @@ function drawTarg(ctx, px, py) {
 function drawDetailsTop() {
     // Nose highlight
     ctxTop.beginPath();
-    ctxTop.ellipse(0, 0, 55, 22, 0, -Math.PI / 6, Math.PI / 6);
+    ctxTop.ellipse(0, 0, 55, 22, 0, -Math.PI/6, Math.PI/6);
     ctxTop.lineTo(48, 0);
     ctxTop.closePath();
     ctxTop.fillStyle = '#ccffcc';
@@ -155,39 +158,149 @@ function drawDetailsTop() {
 
     // L/R fins
     ctxTop.beginPath();
-    ctxTop.moveTo(-38, -16);
-    ctxTop.lineTo(-55, -42);
-    ctxTop.lineTo(-50, -10);
-    ctxTop.moveTo(-38, 16);
-    ctxTop.lineTo(-55, 42);
-    ctxTop.lineTo(-50, 10);
+    ctxTop.moveTo(-15, -22);
+    ctxTop.lineTo(-30, -30);
+    ctxTop.lineTo(-51, -30);
+    ctxTop.lineTo(-52, -10);
+    ctxTop.lineTo(-50, -12);
+
+    ctxTop.moveTo(-15, 22);
+    ctxTop.lineTo(-30, 30);
+    ctxTop.lineTo(-51, 30);
+    ctxTop.lineTo(-52, 10);
+    ctxTop.lineTo(-50, 12);
+
     ctxTop.closePath();
     ctxTop.fillStyle = '#0e4020';
     ctxTop.fill();
+    ctxTop.lineCap = "round";
     ctxTop.strokeStyle = '#2bff7e';
     ctxTop.lineWidth = 1;
     ctxTop.stroke();
 
     // Top fin
     ctxTop.beginPath();
-    ctxTop.moveTo(-37, 0);
-    ctxTop.lineTo(-65, 0);
-    ctxTop.lineTo(-37, -2);
-    ctxTop.moveTo(-65, 0);
-    ctxTop.lineTo(-37, 2);
-    ctxTop.strokeStyle = '#2bff7e';
-    ctxTop.lineWidth = 1.5;
+    ctxTop.moveTo(-16, 0);
+    ctxTop.lineTo(-50, 0);
+    ctxTop.lineTo(-16, -2);
+    ctxTop.moveTo(-50, 0);
+    ctxTop.lineTo(-16, 2);
+    ctxTop.lineWidth = 2.75;
     ctxTop.stroke();
 }
 
-// WIP
+function ds() {
+    function projectSide(point, angle) {
+        return {
+            px: point.x * Math.cos(angle) - point.y * Math.sin(angle),
+            py: -point.z  // negative because canvas Y is flipped
+        };
+    }
+
+    // Left fin
+    const leftFin = [
+        { x: -38, y: -16, z: 0 },
+        { x: -55, y: -42, z: 0 },
+        { x: -50, y: -10, z: 0 },
+    ];
+
+    // Right fin
+    const rightFin = [
+        { x: -38, y:  16, z: 0 },
+        { x: -55, y:  42, z: 0 },
+        { x: -50, y:  10, z: 0 },
+    ];
+
+    // Top fin
+    const topFin = [
+        { x: -38, y: 0, z:  0  },
+        { x: -55, y: 0, z: -30 },
+        { x: -50, y: 0, z: -10 },
+    ];
+
+    function drawFinSide(points, angle) {
+        const projected = points.map(p => projectSide(p, angle));
+        ctxSide.beginPath();
+        ctxSide.moveTo(projected[0].px, projected[0].py);
+        ctxSide.lineTo(projected[1].px, projected[1].py);
+        ctxSide.lineTo(projected[2].px, projected[2].py);
+        ctxSide.closePath();
+        ctxSide.fillStyle = '#0e4020';
+        ctxSide.fill();
+        ctxSide.strokeStyle = '#2bff7e';
+        ctxSide.lineWidth = 1;
+        ctxSide.stroke();
+    }
+
+    // nose tip in 3D
+const noseTip = projectSide({ x: 55, y: 0, z: 0 }, angle);
+
+// the visible half-length after foreshortening
+const visibleLength = Math.abs(Math.cos(angle)) * 55;
+
+ctxSide.beginPath();
+ctxSide.moveTo(0, 0);
+ctxSide.ellipse(0, 0, visibleLength, 22, 0, -Math.PI/6, Math.PI/6);
+ctxSide.lineTo(noseTip.px, 0);
+ctxSide.closePath();
+ctxSide.fillStyle = '#ccffcc';
+ctxSide.fill();
+}
+
 function drawDetailsSide(angle) {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+
+    function project(x, y, z) {
+        return {
+            px: x * cos - y * sin,
+            py: -z
+        };
+    }
+
+    function drawFin(points) {
+        const p = points.map(([x,y,z]) => project(x, y, z));
+        ctxSide.beginPath();
+        ctxSide.moveTo(p[0].px, p[0].py);
+        ctxSide.lineTo(p[1].px, p[1].py);
+        ctxSide.lineTo(p[2].px, p[2].py);
+        ctxSide.closePath();
+        ctxSide.fillStyle = '#0e4020';
+        ctxSide.fill();
+        ctxSide.strokeStyle = '#2bff7e';
+        ctxSide.lineWidth = 1;
+        ctxSide.stroke();
+    }
+
+    // Left fin — flat in Y (horizontal plane)
+    drawFin([[-38, -16, 0], [-55, -42, 0], [-50, -10, 0]]);
+
+    // Right fin — mirror of left
+    drawFin([[-38,  16, 0], [-55,  42, 0], [-50,  10, 0]]);
+
+    // Top fin — flat in X (vertical plane), always fully visible from side
+    drawFin([[-38, 0, 0], [-55, 0, -30], [-50, 0, -10]]);
+
+    // Nose highlight
+    const visibleLength = Math.abs(cos) * 55;
+    const noseTip = project(55, 0, 0);
+    ctxSide.beginPath();
+    ctxSide.moveTo(0, 0);
+    ctxSide.ellipse(0, 0, visibleLength, 22, 0, -Math.PI/6, Math.PI/6);
+    ctxSide.lineTo(noseTip.px, 0);
+    ctxSide.closePath();
+    ctxSide.fillStyle = '#ccffcc';
+    ctxSide.fill();
+}
+
+// WIP
+function SIDEEE(angle) {
     const tailX = -Math.cos(angle) * 55;  // tail migrates left/right as blimp turns
     const noseX =  Math.cos(angle) * 48;  // nose highlight migrates opposite direction
 
     const vl = Math.cos(angle) * 55;  // negative when facing left
 
-    // Draw front-face highlight as the right half of the projected ellipse
+    // Nose highlight
     ctxSide.beginPath();
     ctxSide.ellipse(0, 0, Math.abs(vl), 22, 0, -Math.PI/6, Math.PI/6);
     ctxSide.fillStyle = '#ccffcc';
