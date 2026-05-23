@@ -82,7 +82,7 @@ function drawBlimp(x, y, z, angle) {
     const visibleLength = Math.abs(Math.cos(angle)) * 55 + Math.abs(Math.sin(angle)) * 22;
 
     ctxSide.save();
-    ctxSide.translate(x, canvasSide.height - z);
+    ctxSide.translate(x, z);
     ctxSide.beginPath();
     ctxSide.ellipse(0, 0, visibleLength, 22, 0, 0, Math.PI * 2);
     ctxSide.fillStyle = '#209148';
@@ -108,13 +108,13 @@ function drawHeader(ctx, timerStarted, startTime, score, state) {
     const radToDeg = rad => rad * 180 / Math.PI;
 
     ctx.fillText('HEADING: ' + radToDeg(state.psi).toFixed(2) + "º", canvasTop.width - 16, 32);
-    ctx.fillText('X: ' + state.x.toFixed(2), canvasTop.width - 16, 52);
-    ctx.fillText('Y: ' + state.y.toFixed(2), canvasTop.width - 16, 72);
-    ctx.fillText('Z: ' + state.z.toFixed(2), canvasTop.width - 16, 92);
+    ctx.fillText('X: ' + state.x.toFixed(0), canvasTop.width - 16, 52);
+    ctx.fillText('Y: ' + state.y.toFixed(0), canvasTop.width - 16, 72);
+    ctx.fillText('Z: ' + state.z.toFixed(0), canvasTop.width - 16, 92);
 
     // TIMER DEFAULT DISPLAY
     ctx.textAlign = 'center';
-    ctx.fillText('00:00', canvasTop.width/2, 32);
+    ctx.fillText('00:00', canvasTop.width / 2, 32);
 
     // TIMER STARTS
     if (timerStarted) {
@@ -261,6 +261,7 @@ function ds() {
     ctxSide.fill();
 }
 
+// 
 function drawDetailsSide(angle) {
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);
@@ -296,134 +297,61 @@ function drawDetailsSide(angle) {
     // drawFin([[-38, 0, 0], [-55, 0, -30], [-50, 0, -10]]);
 
     // NOSE HIGHLIGHT
-    // const visibleLength = Math.abs(cos) * 55;
-  
-    // Nose position mapped to edge of blimp
-    // const noseCenterX = 48 * cos; // Offset by 7
-    // const noseRadiusX = 11 * Math.abs(sin); // Grows 
-    // const noseRadiusY = 22 * Math.sin(Math.PI/6); // Constant
+    const v = 55 * Math.abs(Math.cos(angle)) + 22 * Math.abs(Math.sin(angle)); // Horizontal projection
+    const noseCenterX = v * Math.cos(angle); // X coordinate for tip of nose
+    const noseCenterY = 0; // Assuming constant pitch
+    const noseRadX = 55 - 55 * Math.cos(Math.PI/6); // Calculated using parameter t = Math.PI/6
+    const noseRadY = 22 * Math.sin(Math.PI/6); // Constant
 
-    // const noseGrad = ctxSide.createRadialGradient(noseCenterX, 0, 0, noseCenterX, 0, 18);
-    // noseGrad.addColorStop(0, '#ccffcc');
-    // noseGrad.addColorStop(1, '#0e4020');
+    const noseLeftX = noseCenterX - noseRadX;
+    const noseRightX = noseCenterX + noseRadX;
 
-    // heading = 0, nose = right |)
-    // heading = 90, nose = out of screen (full circle)
-    // heading = 180, nose = left (|
-    // heading = -90, nose = into screen (nothing)
+    // +Y is down (canvas convention), opposite of Cartesian
+    if ((0 <= angle) && (angle <= Math.PI/2)) {
+        drawNose(noseLeftX * Math.cos(angle), 0, noseRadY * Math.sin(angle), noseRadY);
+    } else if ((Math.PI/2 < angle) && (angle <= Math.PI)) {
+        drawNose(-noseRightX * Math.cos(angle), 0, noseRadY * Math.sin(angle), noseRadY);
+    }
 
-    // 0 -> 90 -> 180 -> -90 -> 0
-    //    G     S      S      G
-
-    /** */
-    // --------------- PAC MAN -----------------------------
-    // if (sin >= 0) {
-    //     ctxSide.beginPath();    
-    //     // ctxSide.ellipse(noseCenterX, 0, Math.max(noseRadiusX, 1), Math.max(noseRadiusY, 1), 0, 0, Math.PI * 2);
-
-    //     // Convert polar to parametric angles
-    //     const t1 = Math.atan2(visibleLength * Math.sin(-Math.PI/6), 22 * Math.cos(-Math.PI/6));
-    //     const t2 = Math.atan2(visibleLength * Math.sin( Math.PI/6), 22 * Math.cos( Math.PI/6));
-
-    //     // Blend between slice angles and full circle based on sin
-    //     const startAngle = t1 * (1 - Math.abs(sin)) + (-Math.PI) * Math.abs(sin);
-    //     const endAngle = t2 * (1 - Math.abs(sin)) + ( Math.PI) * Math.abs(sin);
-
+    // // ------------------- CASES ----------------------
+    // // heading = 0 (right elliptic section)
+    // if (Math.abs(angle) < 0.01) {
     //     ctxSide.beginPath();
-    //     // if (Math.abs(sin) < 0.99) {
-    //     //     // pie slice — arc + line back to center
-    //     //     ctxSide.moveTo(noseCenterX, 0);
-    //     //     ctxSide.ellipse(noseCenterX, 0, Math.max(noseRadiusX, 1), noseRadiusY, 0, -Math.PI/6, Math.PI/6);
-    //     //     ctxSide.lineTo(noseCenterX, 0);
-    //     // } else {
-    //     //     // full circle when fully facing camera
-    //     //     ctxSide.ellipse(noseCenterX, 0, noseRadiusX, noseRadiusY, 0, 0, Math.PI * 2);
-    //     // }
-    //     ctxSide.moveTo(noseCenterX, 0);
-    //     ctxSide.ellipse(noseCenterX, 0, Math.max(noseRadiusX, 1), Math.max(noseRadiusY, 1), 0, startAngle, endAngle);
-    //     ctxSide.lineTo(noseCenterX, 0);
-        
+    //     ctxSide.moveTo(48, 0);
+    //     ctxSide.ellipse(0, 0, 55, 22, 0, -Math.PI/6, Math.PI/6);
+    //     ctxSide.lineTo(48, 0);
     //     ctxSide.closePath();
     //     ctxSide.fillStyle = '#ccffcc';
     //     ctxSide.fill();
-    //     ctxSide.strokeStyle = '#2bff7e';
-    //     ctxSide.lineWidth = 1;
-    //     ctxSide.stroke();
     // }
 
-// ------------------- JUST A CIRCLE. ------------------------------
+    // // heading = 90 (circle)
+    // else if (Math.abs(angle - Math.PI/2) < 0.01) {
+    //     ctxSide.beginPath();
+    //     ctxSide.arc(0, 0, 22, 0, Math.PI * 2);
+    //     ctxSide.fillStyle = '#ccffcc';
+    //     ctxSide.fill();
+    // }
 
-// if (sin >= 0) {
-//     const noseCenterX = 48 * cos;
-//     const noseRadiusX = 22 * sin;
+    // // heading = 180 (left elliptic section)
+    // else if (Math.abs(Math.abs(angle) - Math.PI) < 0.01) {
+    //     ctxSide.beginPath();
+    //     ctxSide.moveTo(-48, 0);
+    //     ctxSide.ellipse(0, 0, 55, 22, 0, Math.PI - Math.PI/6, Math.PI + Math.PI/6);
+    //     ctxSide.lineTo(-48, 0);
+    //     ctxSide.closePath();
+    //     ctxSide.fillStyle = '#ccffcc';
+    //     ctxSide.fill();
+    // }
 
-//     ctxSide.beginPath();
-//     ctxSide.ellipse(
-//         noseCenterX, 0,
-//         Math.max(noseRadiusX, 0.5), 22,
-//         0, 0, Math.PI * 2
-//     );
-//     ctxSide.fillStyle = '#ccffcc';
-//     ctxSide.fill();
-//     ctxSide.strokeStyle = '#2bff7e';
-//     ctxSide.lineWidth = 1;
-//     ctxSide.stroke();
-// }
+    // // heading = -90 (nothing)
+    // else if (Math.abs(angle + Math.PI/2) < 0.01) {}
+}
 
-// --------------------- CLIPPED ---------------------------------------------
-
-// if (sin >= 0) {
-//     const noseCenterX = 48 * cos;
-//     const noseRadiusX = 22 * sin;
-
-//     // set blimp ellipse as clip region
-//     ctxSide.save();
-//     ctxSide.beginPath();
-//     ctxSide.ellipse(0, 0, 55, 22, 0, 0, Math.PI * 2);
-//     ctxSide.clip();
-
-//     ctxSide.beginPath();
-//     ctxSide.ellipse(noseCenterX, 0, Math.max(noseRadiusX, 0.5), Math.max(noseRadiusY, 0.5), 0, 0, Math.PI * 2);
-//     ctxSide.fillStyle = '#ccffcc';
-//     ctxSide.fill();
-//     ctxSide.strokeStyle = '#2bff7e';
-//     ctxSide.lineWidth = 1;
-//     ctxSide.stroke();
-
-//     ctxSide.restore(); // removes clip region
-// }
-
-// ------------------- CASES ---------------------------------------------
-    // heading = 0 (right elliptic section)
-    if (Math.abs(angle) < 0.01) {
-        ctxSide.beginPath();
-        ctxSide.moveTo(48, 0);
-        ctxSide.ellipse(0, 0, 55, 22, 0, -Math.PI/6, Math.PI/6);
-        ctxSide.lineTo(48, 0);
-        ctxSide.closePath();
-        ctxSide.fillStyle = '#ccffcc';
-        ctxSide.fill();
-    }
-
-    // heading = 90 (circle)
-    else if (Math.abs(angle - Math.PI/2) < 0.01) {
-        ctxSide.beginPath();
-        ctxSide.arc(0, 0, 22, 0, Math.PI * 2);
-        ctxSide.fillStyle = '#ccffcc';
-        ctxSide.fill();
-    }
-
-    // heading = 180 (left elliptic section)
-    else if (Math.abs(Math.abs(angle) - Math.PI) < 0.01) {
-        ctxSide.beginPath();
-        ctxSide.moveTo(-48, 0);
-        ctxSide.ellipse(0, 0, 55, 22, 0, Math.PI - Math.PI/6, Math.PI + Math.PI/6);
-        ctxSide.lineTo(-48, 0);
-        ctxSide.closePath();
-        ctxSide.fillStyle = '#ccffcc';
-        ctxSide.fill();
-    }
-
-    // heading = -90 (nothing)
-    else if (Math.abs(angle + Math.PI/2) < 0.01) {}
+function drawNose(x, y, a, b) {
+    ctxSide.beginPath();
+    ctxSide.ellipse(x, y, a, b, 0, 0, 2 * Math.PI);
+    ctxSide.closePath();
+    ctxSide.fillStyle = '#ccffcc';
+    ctxSide.fill();
 }
