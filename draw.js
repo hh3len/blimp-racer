@@ -306,11 +306,13 @@ function drawDetailsSide(angle) {
     const noseLeftX = noseCenterX - noseRadX;
     const noseRightX = noseCenterX + noseRadX;
 
-    // +Y is down (canvas convention), opposite of Cartesian
+    // +Y is down (canvas convention), opposite of Cartesian coordinates
     if ((0 <= angle) && (angle <= Math.PI/2)) {
         drawNose(noseLeftX * Math.cos(angle), 0, noseRadY * Math.sin(angle), noseRadY);
+        drawN2(noseCenterX, noseCenterY, noseRadX, angle);
     } else if ((Math.PI/2 < angle) && (angle <= Math.PI)) {
-        drawNose(-noseRightX * Math.cos(angle), 0, noseRadY * Math.sin(angle), noseRadY);
+        drawNose(-noseRightX * Math.cos(angle), 0, noseRadY * Math.sin(angle), noseRadY, angle);
+        drawN2(noseCenterX, noseCenterY, noseRadX, angle);
     }
 
     // // ------------------- CASES ----------------------
@@ -350,8 +352,24 @@ function drawDetailsSide(angle) {
 
 function drawNose(x, y, a, b) {
     ctxSide.beginPath();
-    ctxSide.ellipse(x, y, a, b, 0, 0, 2 * Math.PI);
+    ctxSide.ellipse(x, y, a, b, 0, 0, Math.PI * 2);
+    ctxSide.closePath();
+    ctxSide.fillStyle = '#ccffccc0';
+    ctxSide.fill();
+    ctxSide.strokeStyle = '#ccffcc';
+    ctxSide.stroke();
+}
+
+function drawN2(x, y, r, angle) {
+    ctxSide.save();
+    ctxSide.beginPath();
+    ctxSide.ellipse(0, 0, 55 * Math.abs(Math.cos(angle)) + 22 * Math.abs(Math.sin(angle)), 22, 0, 0, Math.PI * 2);
+    ctxSide.clip();
+        
+    ctxSide.beginPath();
+    ctxSide.arc(x, y, r, 0, Math.PI * 2);
     ctxSide.closePath();
     ctxSide.fillStyle = '#ccffcc';
     ctxSide.fill();
+    ctxSide.restore();
 }
