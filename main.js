@@ -66,6 +66,9 @@ function gameLoop() {
     // Compute & update state
     state = rk4(state, inp, 0.025);
 
+    // Wrap heading to [-π, π]
+    state.psi = ((state.psi + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
+    
     // Clamp to canvas bounds
     state.x = Math.max(55, Math.min(D.canvasTop.width  - 55, state.x));
     state.y = Math.max(22, Math.min(D.canvasTop.height - 22, state.y));

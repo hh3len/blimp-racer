@@ -14,8 +14,8 @@ export function draw(state, target, score, timerStarted, startTime) {
     clearCanvas(canvasSide);
 
     // TIMER
-    drawHeader(ctxTop, timerStarted, startTime, score);
-    drawHeader(ctxSide, timerStarted, startTime, score);
+    drawHeader(ctxTop, timerStarted, startTime, score, state);
+    drawHeader(ctxSide, timerStarted, startTime, score, state);
 
     // TARGET
     drawTarg(ctxTop, target.x, target.y);
@@ -96,12 +96,21 @@ function drawBlimp(x, y, z, angle) {
 }
 
 // Works as intended
-function drawHeader(ctx, timerStarted, startTime, score) {
+function drawHeader(ctx, timerStarted, startTime, score, state) {
     // SCORE
     ctx.fillStyle = '#2bff7e';
     ctx.font = '16px monospace';
     ctx.textAlign = 'left';
     ctx.fillText('SCORE: ' + score, 16, 32);
+
+    // HEADING & POSITION
+    ctx.textAlign = 'right';
+    const radToDeg = rad => rad * 180 / Math.PI;
+
+    ctx.fillText('HEADING: ' + radToDeg(state.psi).toFixed(2) + "º", canvasTop.width - 16, 32);
+    ctx.fillText('X: ' + state.x.toFixed(2), canvasTop.width - 16, 52);
+    ctx.fillText('Y: ' + state.y.toFixed(2), canvasTop.width - 16, 72);
+    ctx.fillText('Z: ' + state.z.toFixed(2), canvasTop.width - 16, 92);
 
     // TIMER DEFAULT DISPLAY
     ctx.textAlign = 'center';
@@ -150,8 +159,12 @@ function drawTarg(ctx, px, py) {
 function drawDetailsTop() {
     // Nose highlight
     ctxTop.beginPath();
+
+    // ellipse() is parametric:
+    // x = a * cos(t)
+    // y = b * sin(t)
     ctxTop.ellipse(0, 0, 55, 22, 0, -Math.PI/6, Math.PI/6);
-    ctxTop.lineTo(48, 0);
+    ctxTop.lineTo(55 * Math.cos(Math.PI/6), 0);
     ctxTop.closePath();
     ctxTop.fillStyle = '#ccffcc';
     ctxTop.fill();
@@ -284,27 +297,29 @@ function drawDetailsSide(angle) {
 
     // Nose highlight
     const visibleLength = Math.abs(cos) * 55;
-    const noseTip = project(55, 0, 0);
+    // const noseTip = project(55, 0, 0);
 
-    const noseTop = project(55 * Math.cos(Math.PI/6), 22 * Math.sin(Math.PI/6), 0);
-    const noseBot = project(55 * Math.cos(-Math.PI/6), 22 * Math.sin(-Math.PI/6), 0);
-    const noseAvg = (noseTop.px + noseBot.px) / 2;
+    // const noseTop = project(55 * Math.cos(Math.PI/6), 22 * Math.sin(Math.PI/6), 0);
+    // const noseBot = project(55 * Math.cos(-Math.PI/6), 22 * Math.sin(-Math.PI/6), 0);
 
-    // facing right (cos > 0) = positive X
-    // facing left  (cos < 0) = negative X 
-    const noseAngle = cos >= 0 ? 0 : Math.PI;
+    // facing right = positive cos = positive X
+    // const noseAngle = cos >= 0 ? 0 : Math.PI;
   
+    // Nose cap mapped to edge of blimp
+    const noseCenterX = (visibleLength - 7) * cos; // offset 7px from tip
+
+    // const noseCenterX = 55 * cos; // migrates left/right
+    const noseRadiusX = 18 * Math.abs(sin); // grows as blimp turns toward camera
+    const noseRadiusY = 22 * Math.sin(Math.PI/6);
+
+    // When 
+
     ctxSide.beginPath();    
-    ctxSide.ellipse(0, 0, visibleLength, 22, 0, 
-        noseAngle - Math.PI/6, 
-        noseAngle + Math.PI/6
-    );
-    
-    ctxSide.lineTo(noseAvg, 0);
-    ctxSide.closePath();
+    ctxSide.ellipse(noseCenterX, 0, Math.max(noseRadiusX, 1), Math.max(noseRadiusY, 1), 0, 0, Math.PI * 2);
 
     ctxSide.fillStyle = '#ccffcc';
     ctxSide.fill();
     ctxSide.strokeStyle = '#2bff7e';
+    ctxSide.lineWidth = 1;
     ctxSide.stroke();
 }
