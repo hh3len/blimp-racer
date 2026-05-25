@@ -13,7 +13,7 @@ export function draw(state, target, score, timerStarted, startTime) {
     const targetCanvasZ = canvasSide.height - target.z;
 
     // Camera offsets
-    const camX = state.x - canvasTop.width  / 2;
+    const camX = state.x - canvasTop.width / 2;
     const camY = state.y - canvasTop.height / 2;
     const camZ = canvasZ - canvasSide.height / 2;
 
@@ -50,8 +50,12 @@ function drawGrid(ctx, camX, camY, spacing = 50) {
     ctx.strokeStyle = '#0e2a12';
     ctx.lineWidth = 0.8;
 
+    // Extend grid values infinitely
+    const wrappedX = ((-camX) % spacing + spacing) % spacing;
+    const wrappedY = ((-camY) % spacing + spacing) % spacing;
+
     // Vertical lines
-    for (let x = -camX; x < ctx.canvas.width; x += spacing) {
+    for (let x = wrappedX; x < ctx.canvas.width; x += spacing) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, ctx.canvas.height);
@@ -59,7 +63,7 @@ function drawGrid(ctx, camX, camY, spacing = 50) {
     }
 
     // Horiz lines
-    for (let y = -camY; y < ctx.canvas.height; y += spacing) {
+    for (let y = wrappedY; y < ctx.canvas.height; y += spacing) {
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(ctx.canvas.width, y);
