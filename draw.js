@@ -1,4 +1,5 @@
 import {P} from './physics.js';
+import {COLOR} from './colors.js';
 
 export const canvasTop = document.getElementById('cvTop');
 export const ctxTop = canvasTop.getContext('2d');
@@ -6,7 +7,6 @@ export const ctxTop = canvasTop.getContext('2d');
 export const canvasSide = document.getElementById('cvSide');
 export const ctxSide = canvasSide.getContext('2d');
 
-// Simulate 2D motion
 export function draw(state, target, score, timerStarted, startTime) {
     // Flip z-axis
     const canvasZ = canvasSide.height - state.z;
@@ -47,25 +47,29 @@ export function draw(state, target, score, timerStarted, startTime) {
 
 // Works as intended
 function drawGrid(ctx, camX, camY, spacing = 50) {
+
     // Draw origin crosshairs for top view
     if (ctx == ctxTop) {
-        const ox = ctx.canvas.width / 2 - camX;
-        const oy = ctx.canvas.height / 2 - camY;
+        // const ox = ctx.canvas.width / 2 - camX - ctx.canvas.width / 2;
+        // const oy = ctx.canvas.height / 2 - camY - ctx.canvas.height / 2;
+        const ox = -camX;
+        const oy = -camY;
+
+        console.log(camX, camY)
+        console.log(ox, oy)
 
         ctx.save();
-        ctx.strokeStyle = '#2bff7e';
+        ctx.strokeStyle = COLOR.grn;
 
         ctx.beginPath();
-        ctx.moveTo(ox - 12, oy);
-        ctx.lineTo(ox + 12, oy);
-        ctx.moveTo(ox, oy - 12);
-        ctx.lineTo(ox, oy + 12);
+        ctx.moveTo(ox - 12, oy); ctx.lineTo(ox + 12, oy);
+        ctx.moveTo(ox, oy - 12); ctx.lineTo(ox, oy + 12);
         ctx.stroke();
 
-        ctx.restore(); 
+        ctx.restore();
     }
 
-    ctx.strokeStyle = '#0e2a12';
+    ctx.strokeStyle = COLOR.grid;
     ctx.lineWidth = 0.8;
 
     // Extend grid values infinitely
@@ -87,43 +91,62 @@ function drawGrid(ctx, camX, camY, spacing = 50) {
         ctx.lineTo(ctx.canvas.width, y);
         ctx.stroke();
     }
+
+    // Draw ground
+    if (ctx == ctxSide) {
+        ctx.save();
+       
+        ctx.beginPath();
+        ctx.moveTo(0, ctx.canvas.height - camY); ctx.lineTo(ctx.canvas.width, ctx.canvas.height - camY);
+        ctx.strokeStyle = COLOR.grn;
+        ctx.stroke();
+
+        ctx.fillRect(0, ctx.canvas.height - camY, ctx.canvas.width, ctx.canvas.height);
+
+        ctx.textAlign = 'left'; ctx.font = '0.8rem Share Tech Mono'; ctx.fillStyle = COLOR.grnDim;
+        ctx.fillText('GROUND', 5, ctx.canvas.height - camY + 15); 
+        
+        ctx.restore();
+    }
 };
 
 // Works as intended
 function drawHeader(ctx, timerStarted, startTime, score, state) {
+    // CANVAS LABELS
+    ctx.fillStyle = COLOR.grn; ctx.font = '16px monospace'; ctx.textAlign = 'left';
+    let txt = null
+    ctx == ctxTop ? txt = "TOP VIEW (X-Y)" : txt = "SIDE VIEW (X-Z)";
+    ctx.fillText(txt, 16, 32);
+
     // SCORE
-    ctx.fillStyle = '#2bff7e';
-    ctx.font = '16px monospace';
-    ctx.textAlign = 'left';
-    ctx.fillText('SCORE: ' + score, 16, 32);
-
-    // HEADING & POSITION
     ctx.textAlign = 'right';
-    const radToDeg = rad => rad * 180 / Math.PI;
+    ctx.fillText('SCORE: ' + score, ctx.canvas.width - 16, 32);
 
-    ctx.fillText('HEADING: ' + radToDeg(state.psi).toFixed(2) + "º", canvasTop.width - 16, 32);
-    ctx.fillText('X: ' + state.x.toFixed(0), canvasTop.width - 16, 52);
-    ctx.fillText('Y: ' + state.y.toFixed(0), canvasTop.width - 16, 72);
-    ctx.fillText('Z: ' + state.z.toFixed(0), canvasTop.width - 16, 92);
-    ctx.fillText('ALTITUDE: ' + (state.z / P.SCALE).toFixed(2) + 'm', canvasTop.width - 16, canvasTop.height - 16);
+    // // HEADING & POSITION
+    // const radToDeg = rad => rad * 180 / Math.PI;
+
+    // ctx.fillText('HEADING: ' + radToDeg(state.psi).toFixed(2) + "°", ctx.canvas.width - 16, 32);
+    // ctx.fillText('X: ' + (state.x / P.SCALE).toFixed(2) + 'm', ctx.canvas.width - 16, 52);
+    // ctx.fillText('Y: ' + (state.y / P.SCALE).toFixed(2) + 'm', ctx.canvas.width - 16, 72);
+    // ctx.fillText('ALTITUDE: ' + (state.z / P.SCALE).toFixed(2) + 'm', ctx.canvas.width - 16, ctx.canvas.height - 16);
 
     // TIMER DEFAULT DISPLAY
     ctx.textAlign = 'center';
-    ctx.fillText('00:00', canvasTop.width / 2, 32);
+    ctx.fillText('00:00', ctx.canvas.width / 2, 32);
 
     // TIMER STARTS
     if (timerStarted) {
         // Clear 00:00 display
-        ctx.fillStyle = 'rgb(0, 0, 0)';
-        ctx.fillRect(canvasTop.width/2 - 45, 12, 90, 28);
+        ctx.fillStyle = 'black';
+        ctx.fillRect(ctx.canvas.width/2 - 45, 12, 90, 28);
 
         // Calculate current time
         const elapsed = (performance.now() - startTime) / 1000;
         const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
         const ss = String(Math.floor(elapsed % 60)).padStart(2, '0');
         
-        ctx.fillStyle = '#2bff7e';
-        ctx.fillText(mm + ':' + ss, canvasTop.width/2, 32);
+        ctx.fillStyle = COLOR.grn;
+        ctx.fillText(mm + ':' + ss, ctx.canvas.width/2, 32);
     }
 }
 
@@ -131,7 +154,7 @@ function drawHeader(ctx, timerStarted, startTime, score, state) {
 function drawTarg(ctx, px, py) {
     // CIRCLE
     ctx.beginPath();
-    ctx.strokeStyle = '#ffd426';
+    ctx.strokeStyle = COLOR.org;
     ctx.lineWidth = 1.5;
     ctx.setLineDash([5, 5]);
     ctx.arc(px, py, 30, 0, Math.PI * 2);
@@ -146,7 +169,7 @@ function drawTarg(ctx, px, py) {
     ctx.lineTo(px, py + ds);
     ctx.lineTo(px - ds, py);
     ctx.closePath();
-    ctx.fillStyle = '#ffd426';
+    ctx.fillStyle = COLOR.gold;
     ctx.fill();
 };
 
@@ -168,9 +191,9 @@ function drawBody(ctx, x, y, psi) {
 
     ctx.beginPath();
     ctx.ellipse(0, 0, length, 22, 0, 0, Math.PI * 2);
-    ctx.fillStyle = '#209148';
+    ctx.fillStyle = COLOR.body;
     ctx.fill();
-    ctx.strokeStyle = '#2bff7e';
+    ctx.strokeStyle = COLOR.grn;
     ctx.lineWidth = 2;
     ctx.stroke();
 
@@ -191,7 +214,7 @@ function drawDetailsTop() {
     ctxTop.ellipse(0, 0, 55, 22, 0, -Math.PI/6, Math.PI/6);
     ctxTop.lineTo(55 * Math.cos(Math.PI/6), 0);
     ctxTop.closePath();
-    ctxTop.fillStyle = '#ccffcc';
+    ctxTop.fillStyle = COLOR.nose;
     ctxTop.fill();
 
     // L/R fins
@@ -209,10 +232,10 @@ function drawDetailsTop() {
     ctxTop.lineTo(-50, 12);
 
     ctxTop.closePath();
-    ctxTop.fillStyle = '#0e4020';
+    ctxTop.fillStyle = COLOR.fin;
     ctxTop.fill();
     ctxTop.lineCap = "round";
-    ctxTop.strokeStyle = '#2bff7e';
+    ctxTop.strokeStyle = COLOR.grn;
     ctxTop.lineWidth = 1;
     ctxTop.stroke();
 
@@ -262,9 +285,9 @@ function drawDetailsSide(angle) {
         }
 
         ctxSide.closePath();
-        ctxSide.fillStyle = '#0e4020';
+        ctxSide.fillStyle = COLOR.fin;
         ctxSide.fill();
-        ctxSide.strokeStyle = '#2bff7e';
+        ctxSide.strokeStyle = COLOR.grn;
         ctxSide.stroke();
     }
 
@@ -315,7 +338,7 @@ function drawEllipse(x, y, a, b) {
     ctxSide.closePath();
     ctxSide.fillStyle = '#ccffccc0';
     ctxSide.fill();
-    ctxSide.strokeStyle = '#ccffcc';
+    ctxSide.strokeStyle = COLOR.nose;
     ctxSide.stroke();
 }
 
@@ -323,14 +346,14 @@ function drawCircle(x, y, r, angle) {
     ctxSide.beginPath();
     ctxSide.arc(x, y, r, 0, Math.PI * 2);
     ctxSide.closePath();
-    ctxSide.fillStyle = '#ccffcc';
+    ctxSide.fillStyle = COLOR.nose;
     ctxSide.fill();
 
     const gradient = ctxSide.createConicGradient(0, r, r);
 
-    gradient.addColorStop(0, "#ccffcc");
-    gradient.addColorStop(0.5, "#ffffff");
-    gradient.addColorStop(1, "#ccffcc");
+    gradient.addColorStop(0, COLOR.nose);
+    gradient.addColorStop(0.5, 'white');
+    gradient.addColorStop(1, COLOR.nose);
 
     ctxSide.fillStyle = gradient;
     ctxSide.fill();

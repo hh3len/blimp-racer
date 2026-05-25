@@ -1,0 +1,144 @@
+/* Define commonly used colors & fonts */
+:root {
+    --bg: #050e06;
+    --txt: #2bff7e;
+    --panel: #070d08;
+
+    --lightG: #97ffc6;
+    --darkG: #1a7040;
+
+    --font: 'Share Tech Mono', monospace;
+    --title: 'Orbitron', sans-serif;
+ }
+
+/* Applies to all elements */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Default display */
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+
+    min-height: 100vh;
+    padding: 10px;
+    gap: 10px;
+
+    background: var(--bg);
+    color: var(--txt);
+    font-family: var(--font);
+}
+
+#main {
+    display: flex;
+    width: 100%;
+    max-width: 1140px;
+    gap: 10px;
+    padding: 10px 18px;
+    flex: 1;
+}
+
+header {
+    width: 100%;
+    max-width: 1140px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px 6px;
+    border-bottom: 1px solid var(--darkG);
+}
+
+h1 {
+    font-family: var(--title);
+    font-size: 1.05rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    color: var(--txt);
+    text-shadow: 0 0 12px #2bff7e66;
+}
+
+h3 {
+    font-family: var(--title);
+    letter-spacing: 0.18em;
+    color: var(--txt);
+    text-shadow: 0 0 12px #2bff7e66;
+}
+
+footer {
+    width: 100%; 
+    max-width: 1140px;
+    padding: 5px 18px 8px;
+    border-top: 1px solid var(--darkG);
+    font-size: 0.62rem;
+    color: var(--darkG);
+    letter-spacing: 0.1em;
+    display: flex;
+    justify-content: space-between;
+}
+
+.canvas {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+}
+
+#display {
+    width: 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.disp-block {
+    background: var(--panel);
+    border: 1px solid var(--txt);
+    padding: 8px 10px;
+}
+
+.disp-block h3 {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--disp);
+    border-bottom: px solid var(--darkG);
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+}
+
+.state-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.state-label {
+    font-size: 0.67rem;
+    color: var(--txt); 
+}
+
+.state-val {
+    font-size: 0.78rem; 
+    color: var(--txt);
+}
+
+.motor-row {
+    margin-bottom: 6px; 
+}
+
+.motor-label { 
+    font-size: 0.67rem; 
+    color: var(--disp); 
+    margin-bottom: 2px; 
+}
+
+.motor-bar {
+    height: 6px;
+    background: #0a1a0c;
+    border: 1px solid var(--darkG);
+}

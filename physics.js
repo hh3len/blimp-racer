@@ -1,3 +1,5 @@
+import * as D from './draw.js';
+
 /* Physical constants from:
 * Sponaugle, Austin Lane, "Reactive Model-Free Control for Underactuated Vehicles Operating in Resource-Constrained Environments" (2025). 
 * Graduate Theses, Dissertations, and Problem Reports. 12996. https://researchrepository.wvu.edu/etd/12996
@@ -12,17 +14,8 @@ export const P = {
     ly: 0.461, // lateral motor moment arm [m]
     F_lat: 0.40, // lateral thrust per key press [N]
     F_vert: 0.55, // vertical thrust per key press [N]
-    SCALE: 120, // pixels per meter
+    SCALE: D.canvasSide.height / 2, // pixels per meter
 };
-
-// Generate & define random target
-export function newTarget() {
-    return {
-        x: Math.random() * 500,
-        y: Math.random() * 200,
-        z: Math.random() * 200,
-    };
-}
 
 /** Compute rates of change for each state variable:
  * dx (global X velocity) = surge * cos(heading)

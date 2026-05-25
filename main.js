@@ -1,21 +1,31 @@
-import {P, newTarget, derivatives, rk4} from './physics.js';
+import {P, derivatives, rk4} from './physics.js';
 import * as D from './draw.js';
 
 // Initialize scoreboard, state, and target
 let timerStarted = false;
 let startTime = null;
 let score = 0;
-let target = newTarget();
 
 let state = {
-    x: 250, // global x position [pixels]
-    y: 150, // global y position [pixels]
-    z: 120, // global z posiion [pixels]
+    x: 0, // global x position [px]
+    y: 0, // global y position [px]
+    z: 150, // global z posiion [px]
     psi: 0, // heading [rad]
     u: 0, // surge velocity [m/s]
     w: 0, // heave velocity [m/s]
     r: 0, // yaw velocity [rad/s]
 };
+
+// Generate & define random target
+function newTarget() {
+    return {
+        x: Math.random() * (D.canvasTop.width),
+        y: Math.random() * (D.canvasTop.height),
+        z: Math.random() * (D.canvasSide.height) + 36 // Minimum z height
+    };
+}
+
+let target = newTarget();
 
 // User-controlled inputs
 const keys = {
@@ -26,9 +36,9 @@ const keys = {
 };
 
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'ArrowUp')    keys.up    = true;
-    if (e.key === 'ArrowDown')  keys.down  = true;
-    if (e.key === 'ArrowLeft')  keys.left  = true;
+    if (e.key === 'ArrowUp') keys.up = true;
+    if (e.key === 'ArrowDown') keys.down = true;
+    if (e.key === 'ArrowLeft') keys.left = true;
     if (e.key === 'ArrowRight') keys.right = true;
     e.preventDefault();
 
@@ -39,9 +49,9 @@ document.addEventListener('keydown', function(e) {
 });
 
 document.addEventListener('keyup', function(e) {
-    if (e.key === 'ArrowUp')    keys.up    = false;
-    if (e.key === 'ArrowDown')  keys.down  = false;
-    if (e.key === 'ArrowLeft')  keys.left  = false;
+    if (e.key === 'ArrowUp') keys.up = false;
+    if (e.key === 'ArrowDown') keys.down = false;
+    if (e.key === 'ArrowLeft') keys.left = false;
     if (e.key === 'ArrowRight') keys.right = false;
 });
 
@@ -68,21 +78,21 @@ function gameLoop() {
 
     // Wrap heading to [-pi, pi]
     state.psi = ((state.psi + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
-    
 
     // Clamp z to be above ground
-    if (state.z < 0) {
-        state.z = 0;
-        state.w = Math.max(0, state.w);
+    if (state.z < 22) {
+        state.z = 22;
+        state.w = Math.max(0.5, state.w); // Possibly implement CBF here
     }
 
-    // Check if captured
+    // Check if ship is within capture radius
     const dx = target.x - state.x;
     const dy = target.y - state.y;
     const dz = target.z - state.z;
+    const captured = 30;
 
     const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
-    if (dist < 30) {
+    if (dist < captured) {
         score++;
         target = newTarget();
     }      
