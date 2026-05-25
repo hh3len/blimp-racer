@@ -144,6 +144,15 @@ footer {
     border: 1px solid var(--darkG);
 }
 
+.motor-fill {
+    height: 100%;
+    width: 0%;
+    transition: width 0.04s linear;
+}
+
+.motor-fill.lr { background: #15c05a; }
+.motor-fill.vt { background: #3ab0ff; }
+
 /* SYSTEM */
  .score {
    font-family: var(--title);

@@ -14,6 +14,7 @@ export const P = {
     ly: 0.461, // lateral motor moment arm [m]
     F_lat: 0.40, // lateral thrust per key press [N]
     F_vert: 0.55, // vertical thrust per key press [N]
+    F_max: 1.07, // maximum motor force [N]
     SCALE: D.canvasSide.height / 2, // pixels per meter
 };
 

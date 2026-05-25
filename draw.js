@@ -7,7 +7,7 @@ export const ctxTop = canvasTop.getContext('2d');
 export const canvasSide = document.getElementById('cvSide');
 export const ctxSide = canvasSide.getContext('2d');
 
-export function draw(state, target, score, timerStarted, startTime) {
+export function draw(state, target) {
     // Flip z-axis
     const canvasZ = canvasSide.height - state.z;
     const targetCanvasZ = canvasSide.height - target.z;
@@ -22,16 +22,13 @@ export function draw(state, target, score, timerStarted, startTime) {
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     };
+
     clearCanvas(ctxTop);
     clearCanvas(ctxSide);
 
     // GRID
     drawGrid(ctxTop, camX, camY);
     drawGrid(ctxSide, camX, camZ);
-
-    // TIMER
-    drawHeader(ctxTop, timerStarted, startTime, score, state);
-    drawHeader(ctxSide, timerStarted, startTime, score, state);
 
     // TARGET
     drawTarg(ctxTop, target.x - camX, target.y - camY);
@@ -54,9 +51,6 @@ function drawGrid(ctx, camX, camY, spacing = 50) {
         // const oy = ctx.canvas.height / 2 - camY - ctx.canvas.height / 2;
         const ox = -camX;
         const oy = -camY;
-
-        console.log(camX, camY)
-        console.log(ox, oy)
 
         ctx.save();
         ctx.strokeStyle = COLOR.grn;
@@ -109,46 +103,6 @@ function drawGrid(ctx, camX, camY, spacing = 50) {
         ctx.restore();
     }
 };
-
-// Works as intended
-function drawHeader(ctx, timerStarted, startTime, score, state) {
-    // CANVAS LABELS
-    // ctx.fillStyle = COLOR.grn; ctx.font = '16px monospace'; ctx.textAlign = 'left';
-    // let txt = null
-    // ctx == ctxTop ? txt = "TOP VIEW (X-Y)" : txt = "SIDE VIEW (X-Z)";
-    // ctx.fillText(txt, 16, 32);
-
-    // SCORE
-    // ctx.textAlign = 'right';
-    // ctx.fillText('SCORE: ' + score, ctx.canvas.width - 16, 32);
-
-    // // HEADING & POSITION
-    // const radToDeg = rad => rad * 180 / Math.PI;
-
-    // ctx.fillText('HEADING: ' + radToDeg(state.psi).toFixed(2) + "°", ctx.canvas.width - 16, 32);
-    // ctx.fillText('X: ' + (state.x / P.SCALE).toFixed(2) + 'm', ctx.canvas.width - 16, 52);
-    // ctx.fillText('Y: ' + (state.y / P.SCALE).toFixed(2) + 'm', ctx.canvas.width - 16, 72);
-    // ctx.fillText('ALTITUDE: ' + (state.z / P.SCALE).toFixed(2) + 'm', ctx.canvas.width - 16, ctx.canvas.height - 16);
-
-    // TIMER DEFAULT DISPLAY
-    // ctx.textAlign = 'center';
-    // ctx.fillText('00:00', ctx.canvas.width / 2, 32);
-
-    // TIMER STARTS
-    // if (timerStarted) {
-    //     // Clear 00:00 display
-    //     ctx.fillStyle = 'black';
-    //     ctx.fillRect(ctx.canvas.width/2 - 45, 12, 90, 28);
-
-    //     // Calculate current time
-    //     const elapsed = (performance.now() - startTime) / 1000;
-    //     const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
-    //     const ss = String(Math.floor(elapsed % 60)).padStart(2, '0');
-        
-    //     ctx.fillStyle = COLOR.grn;
-    //     ctx.fillText(mm + ':' + ss, ctx.canvas.width/2, 32);
-    // }
-}
 
 // Works as intended
 function drawTarg(ctx, px, py) {

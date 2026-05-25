@@ -1,5 +1,6 @@
 import {P, derivatives, rk4} from './physics.js';
 import * as D from './draw.js';
+import * as DISP from './display.js';
 
 // Initialize scoreboard, state, and target
 let timerStarted = false;
@@ -24,7 +25,6 @@ function newTarget() {
         z: Math.random() * (D.canvasSide.height) + 36 // Minimum z height
     };
 }
-
 let target = newTarget();
 
 // User-controlled inputs
@@ -55,18 +55,15 @@ document.addEventListener('keyup', function(e) {
     if (e.key === 'ArrowRight') keys.right = false;
 });
 
-function gameLoop() {
+function gameLoop(timestamp) {
     const F1 = keys.right ? P.F_lat : 0; // Right motor thrust
     const F2 = keys.left ? P.F_lat : 0; // Left motor thrust
-
     // Up key → positive Fz → positive dw → w increases → z increases → blimp rises & vice versa for down
     const Fz = (keys.up ? P.F_vert : 0) - (keys.down ? P.F_vert : 0);
 
-    /** Calculate & save inputs:
-     * Fx (surge thrust)
+    /* Fx (surge thrust)
      * Mz (differential torque)
-     * Fz (heave thrust)
-    */
+     * Fz (heave thrust) */
     const inp = {
         Fx: F1 + F2,
         Mz: (F1 - F2) * P.ly,
@@ -97,7 +94,8 @@ function gameLoop() {
         target = newTarget();
     }      
 
-    D.draw(state, target, score, timerStarted, startTime);
+    D.draw(state, target);
+    DISP.updateHUD(state, inp, target, score);
     requestAnimationFrame(gameLoop);
 }
 
