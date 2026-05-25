@@ -74,7 +74,7 @@ footer {
     max-width: 1140px;
     padding: 5px 18px 8px;
     border-top: 1px solid var(--darkG);
-    font-size: 0.62rem;
+    font-size: 0.67rem;
     color: var(--darkG);
     letter-spacing: 0.1em;
     display: flex;
@@ -88,7 +88,8 @@ footer {
     flex: 1;
 }
 
-#display {
+/* SIDEBAR */
+#sidebar {
     width: 180px;
     display: flex;
     flex-direction: column;
@@ -105,8 +106,8 @@ footer {
 .disp-block h3 {
     font-size: 0.65rem;
     letter-spacing: 0.2em;
-    color: var(--disp);
-    border-bottom: px solid var(--darkG);
+    color: var(--lightG);
+    border-bottom: 1px solid var(--darkG);
     padding-bottom: 4px;
     margin-bottom: 6px;
 }
@@ -142,3 +143,38 @@ footer {
     background: #0a1a0c;
     border: 1px solid var(--darkG);
 }
+
+/* SYSTEM */
+ .score {
+   font-family: var(--title);
+   font-size: 3rem;
+   font-weight: 900;
+   color: var(--txt);
+   text-align: center;
+   text-shadow: 0 0 20px #2bff7e88;
+   line-height: 1;
+   margin: 4px 0;
+ }
+ .score-txt {
+   font-size: 0.67rem;
+   color: var(--txt);
+   text-align: center;
+   letter-spacing: 0.12em;
+   margin-bottom: 10px;
+ }
+
+  #fps {
+   font-size: 0.67rem;
+   color: var(--txt);
+   text-align: center;
+   letter-spacing: 0.12em;
+   margin-bottom: 10px;
+ }
+
+ #time-elapsed {
+   font-size: 0.67rem;
+   color: var(--txt);
+   text-align: center;
+   letter-spacing: 0.12em;
+   margin-bottom: 10px;
+ }

@@ -113,14 +113,14 @@ function drawGrid(ctx, camX, camY, spacing = 50) {
 // Works as intended
 function drawHeader(ctx, timerStarted, startTime, score, state) {
     // CANVAS LABELS
-    ctx.fillStyle = COLOR.grn; ctx.font = '16px monospace'; ctx.textAlign = 'left';
-    let txt = null
-    ctx == ctxTop ? txt = "TOP VIEW (X-Y)" : txt = "SIDE VIEW (X-Z)";
-    ctx.fillText(txt, 16, 32);
+    // ctx.fillStyle = COLOR.grn; ctx.font = '16px monospace'; ctx.textAlign = 'left';
+    // let txt = null
+    // ctx == ctxTop ? txt = "TOP VIEW (X-Y)" : txt = "SIDE VIEW (X-Z)";
+    // ctx.fillText(txt, 16, 32);
 
     // SCORE
-    ctx.textAlign = 'right';
-    ctx.fillText('SCORE: ' + score, ctx.canvas.width - 16, 32);
+    // ctx.textAlign = 'right';
+    // ctx.fillText('SCORE: ' + score, ctx.canvas.width - 16, 32);
 
     // // HEADING & POSITION
     // const radToDeg = rad => rad * 180 / Math.PI;
@@ -131,23 +131,23 @@ function drawHeader(ctx, timerStarted, startTime, score, state) {
     // ctx.fillText('ALTITUDE: ' + (state.z / P.SCALE).toFixed(2) + 'm', ctx.canvas.width - 16, ctx.canvas.height - 16);
 
     // TIMER DEFAULT DISPLAY
-    ctx.textAlign = 'center';
-    ctx.fillText('00:00', ctx.canvas.width / 2, 32);
+    // ctx.textAlign = 'center';
+    // ctx.fillText('00:00', ctx.canvas.width / 2, 32);
 
     // TIMER STARTS
-    if (timerStarted) {
-        // Clear 00:00 display
-        ctx.fillStyle = 'black';
-        ctx.fillRect(ctx.canvas.width/2 - 45, 12, 90, 28);
+    // if (timerStarted) {
+    //     // Clear 00:00 display
+    //     ctx.fillStyle = 'black';
+    //     ctx.fillRect(ctx.canvas.width/2 - 45, 12, 90, 28);
 
-        // Calculate current time
-        const elapsed = (performance.now() - startTime) / 1000;
-        const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
-        const ss = String(Math.floor(elapsed % 60)).padStart(2, '0');
+    //     // Calculate current time
+    //     const elapsed = (performance.now() - startTime) / 1000;
+    //     const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
+    //     const ss = String(Math.floor(elapsed % 60)).padStart(2, '0');
         
-        ctx.fillStyle = COLOR.grn;
-        ctx.fillText(mm + ':' + ss, ctx.canvas.width/2, 32);
-    }
+    //     ctx.fillStyle = COLOR.grn;
+    //     ctx.fillText(mm + ':' + ss, ctx.canvas.width/2, 32);
+    // }
 }
 
 // Works as intended
