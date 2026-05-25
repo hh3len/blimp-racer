@@ -1,4 +1,4 @@
-import { P, newTarget, derivatives, rk4 } from './physics.js';
+import {P, newTarget, derivatives, rk4} from './physics.js';
 import * as D from './draw.js';
 
 // Initialize scoreboard, state, and target

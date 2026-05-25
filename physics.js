@@ -12,7 +12,7 @@ export const P = {
     ly: 0.461, // lateral motor moment arm [m]
     F_lat: 0.40, // lateral thrust per key press [N]
     F_vert: 0.55, // vertical thrust per key press [N]
-    SCALE: 120, // conversion for pixels per meter
+    SCALE: 120, // pixels per meter
 };
 
 // Generate & define random target

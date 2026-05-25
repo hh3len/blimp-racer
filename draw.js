@@ -1,3 +1,5 @@
+import {P} from './physics.js';
+
 export const canvasTop = document.getElementById('cvTop');
 export const ctxTop = canvasTop.getContext('2d');
 export const canvasSide = document.getElementById('cvSide');
@@ -5,6 +7,10 @@ export const ctxSide = canvasSide.getContext('2d');
 
 // Simulate 2D motion
 export function draw(state, target, score, timerStarted, startTime) {
+    // Flip z-axis
+    const canvasZ = canvasSide.height - state.z;
+    const targetCanvasZ = canvasSide.height - target.z;
+
     // CLEAR CANVAS
     let clearCanvas = (canvas) => {
         canvas.getContext('2d').fillStyle = 'black';
@@ -19,13 +25,11 @@ export function draw(state, target, score, timerStarted, startTime) {
 
     // TARGET
     drawTarg(ctxTop, target.x, target.y);
-    drawTarg(ctxSide, target.x, target.z);
+    drawTarg(ctxSide, target.x, targetCanvasZ);
     
     // BLIMP
-    // drawBlimp(state.x, state.y, state.z, state.psi);
-
     drawBody(ctxTop, state.x, state.y, state.psi);
-    drawBody(ctxSide, state.x, state.z, state.psi);
+    drawBody(ctxSide, state.x, canvasZ, state.psi);
 }
 
 // save current canvas
@@ -59,43 +63,6 @@ function drawBody(ctx, x, y, psi) {
 }
 
 // Works as intended
-function drawBlimp(x, y, z, angle) {
-    // BLIMP
-    ctxTop.save();
-    ctxTop.translate(x, y);
-    ctxTop.rotate(angle);
-
-    // Body
-    ctxTop.beginPath();
-    ctxTop.ellipse(0, 0, 55, 22, 0, 0, Math.PI * 2);
-    ctxTop.fillStyle = '#209148';
-    ctxTop.fill();
-    ctxTop.strokeStyle = '#2bff7e';
-    ctxTop.lineWidth = 2;
-    ctxTop.stroke();
-
-    drawDetailsTop();
-    ctxTop.restore();
-
-    // SIDE VIEW — X horizontal, Z vertical
-    // Foreshortening!
-    const visibleLength = Math.abs(Math.cos(angle)) * 55 + Math.abs(Math.sin(angle)) * 22;
-
-    ctxSide.save();
-    ctxSide.translate(x, z);
-    ctxSide.beginPath();
-    ctxSide.ellipse(0, 0, visibleLength, 22, 0, 0, Math.PI * 2);
-    ctxSide.fillStyle = '#209148';
-    ctxSide.fill();
-    ctxSide.strokeStyle = '#2bff7e';
-    ctxSide.lineWidth = 2;
-    ctxSide.stroke();
-
-    SIDEEE(angle);
-    ctxSide.restore();
-}
-
-// Works as intended
 function drawHeader(ctx, timerStarted, startTime, score, state) {
     // SCORE
     ctx.fillStyle = '#2bff7e';
@@ -111,6 +78,7 @@ function drawHeader(ctx, timerStarted, startTime, score, state) {
     ctx.fillText('X: ' + state.x.toFixed(0), canvasTop.width - 16, 52);
     ctx.fillText('Y: ' + state.y.toFixed(0), canvasTop.width - 16, 72);
     ctx.fillText('Z: ' + state.z.toFixed(0), canvasTop.width - 16, 92);
+    ctx.fillText('ALTITUDE: ' + (state.z / P.SCALE).toFixed(2) + 'm', canvasTop.width - 16, canvasTop.height - 16);
 
     // TIMER DEFAULT DISPLAY
     ctx.textAlign = 'center';
