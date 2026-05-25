@@ -2,6 +2,7 @@ import {P} from './physics.js';
 
 export const canvasTop = document.getElementById('cvTop');
 export const ctxTop = canvasTop.getContext('2d');
+
 export const canvasSide = document.getElementById('cvSide');
 export const ctxSide = canvasSide.getContext('2d');
 
@@ -11,56 +12,82 @@ export function draw(state, target, score, timerStarted, startTime) {
     const canvasZ = canvasSide.height - state.z;
     const targetCanvasZ = canvasSide.height - target.z;
 
+    // Camera offsets
+    const camX = state.x - canvasTop.width / 2;
+    const camY = state.y - canvasTop.height / 2;
+    const camZ = canvasZ - canvasSide.height / 2;
+
     // CLEAR CANVAS
-    let clearCanvas = (canvas) => {
-        canvas.getContext('2d').fillStyle = 'black';
-        canvas.getContext('2d').fillRect(0, 0, canvas.width, canvas.height);
+    let clearCanvas = (ctx) => {
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     };
-    clearCanvas(canvasTop);
-    clearCanvas(canvasSide);
+    clearCanvas(ctxTop);
+    clearCanvas(ctxSide);
+
+    // GRID
+    drawGrid(ctxTop, camX, camY);
+    drawGrid(ctxSide, camX, camZ);
 
     // TIMER
     drawHeader(ctxTop, timerStarted, startTime, score, state);
     drawHeader(ctxSide, timerStarted, startTime, score, state);
 
     // TARGET
-    drawTarg(ctxTop, target.x, target.y);
-    drawTarg(ctxSide, target.x, targetCanvasZ);
+    drawTarg(ctxTop, target.x - camX, target.y - camY);
+    drawTarg(ctxSide, target.x - camX, targetCanvasZ - camZ);
     
     // BLIMP
-    drawBody(ctxTop, state.x, state.y, state.psi);
-    drawBody(ctxSide, state.x, canvasZ, state.psi);
-}
+    // drawBody(ctxTop, state.x, state.y, state.psi);
+    // drawBody(ctxSide, state.x, canvasZ, state.psi);
 
-// save current canvas
-// translate
-// rotate IFF xy
-// begin path to draw ellipse
-// drawDetails
-// restore
+    drawBody(ctxTop, canvasTop.width / 2, canvasTop.height / 2, state.psi);
+    drawBody(ctxSide, canvasTop.width / 2, canvasTop.height / 2, state.psi);
+}
 
 // Works as intended
-function drawBody(ctx, x, y, psi) {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx == ctxTop && ctx.rotate(psi);
+function drawGrid(ctx, camX, camY, spacing = 50) {
+    // Draw origin crosshairs for top view
+    if (ctx == ctxTop) {
+        const ox = ctx.canvas.width / 2 - camX;
+        const oy = ctx.canvas.height / 2 - camY;
 
-    let length = 55;
-    ctx == ctxSide ? length = Math.abs(Math.cos(psi)) * 55 + Math.abs(Math.sin(psi)) * 22 : 55;
+        ctx.save();
+        ctx.strokeStyle = '#2bff7e';
 
-    ctx.beginPath();
-    ctx.ellipse(0, 0, length, 22, 0, 0, Math.PI * 2);
-    ctx.fillStyle = '#209148';
-    ctx.fill();
-    ctx.strokeStyle = '#2bff7e';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(ox - 12, oy);
+        ctx.lineTo(ox + 12, oy);
+        ctx.moveTo(ox, oy - 12);
+        ctx.lineTo(ox, oy + 12);
+        ctx.stroke();
 
-    ctx == ctxTop && drawDetailsTop();
-    ctx == ctxSide && drawDetailsSide(psi);
+        ctx.restore(); 
+    }
 
-    ctx.restore();
-}
+    ctx.strokeStyle = '#0e2a12';
+    ctx.lineWidth = 0.8;
+
+    // Extend grid values infinitely
+    const wrappedX = ((-camX) % spacing + spacing) % spacing;
+    const wrappedY = ((-camY) % spacing + spacing) % spacing;
+
+    // Vertical lines
+    for (let x = wrappedX; x < ctx.canvas.width; x += spacing) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, ctx.canvas.height);
+        ctx.stroke();
+    }
+
+    // Horiz lines
+    for (let y = wrappedY; y < ctx.canvas.height; y += spacing) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(ctx.canvas.width, y);
+        ctx.stroke();
+    }
+};
 
 // Works as intended
 function drawHeader(ctx, timerStarted, startTime, score, state) {
@@ -122,6 +149,36 @@ function drawTarg(ctx, px, py) {
     ctx.fillStyle = '#ffd426';
     ctx.fill();
 };
+
+// save current canvas
+// translate
+// rotate IFF xy
+// begin path to draw ellipse
+// drawDetails
+// restore
+
+// Works as intended
+function drawBody(ctx, x, y, psi) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx == ctxTop && ctx.rotate(psi);
+
+    let length = 55;
+    ctx == ctxSide ? length = Math.abs(Math.cos(psi)) * 55 + Math.abs(Math.sin(psi)) * 22 : 55;
+
+    ctx.beginPath();
+    ctx.ellipse(0, 0, length, 22, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#209148';
+    ctx.fill();
+    ctx.strokeStyle = '#2bff7e';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx == ctxTop && drawDetailsTop();
+    ctx == ctxSide && drawDetailsSide(psi);
+
+    ctx.restore();
+}
 
 // Works as intended
 function drawDetailsTop() {

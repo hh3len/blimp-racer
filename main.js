@@ -64,15 +64,13 @@ function gameLoop() {
     };
 
     // Compute & update state
-    state = rk4(state, inp, 0.025);
+    state = rk4(state, inp);
 
-    // Wrap heading to [-π, π]
+    // Wrap heading to [-pi, pi]
     state.psi = ((state.psi + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
     
-    // Clamp to canvas bounds
-    state.x = Math.max(55, Math.min(D.canvasTop.width  - 55, state.x));
-    state.y = Math.max(22, Math.min(D.canvasTop.height - 22, state.y));
 
+    // Clamp z to be above ground
     if (state.z < 0) {
         state.z = 0;
         state.w = Math.max(0, state.w);

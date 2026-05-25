@@ -47,9 +47,7 @@ export function derivatives(s, inp) {
 }
 
 // Runge-Kutta 4th order integrator (RK4)
-const rk4_step = 0.025;
-
-export function rk4(s, inp, dt) {
+export function rk4(s, inp, dt = 0.025) {
     const add = (s, d, t) => ({
         ...s,
         x: s.x + t * d.dx,
@@ -62,9 +60,9 @@ export function rk4(s, inp, dt) {
     });
     
     const k1 = derivatives(s, inp);
-    const k2 = derivatives(add(s, k1, rk4_step/2), inp);
-    const k3 = derivatives(add(s, k2, rk4_step/2), inp);
-    const k4 = derivatives(add(s, k3, rk4_step), inp);
+    const k2 = derivatives(add(s, k1, dt/2), inp);
+    const k3 = derivatives(add(s, k2, dt/2), inp);
+    const k4 = derivatives(add(s, k3, dt), inp);
 
     return add(s, {
         dx: (k1.dx + 2*k2.dx + 2*k3.dx + k4.dx) / 6,
@@ -74,5 +72,5 @@ export function rk4(s, inp, dt) {
         du: (k1.du + 2*k2.du + 2*k3.du + k4.du) / 6,
         dw: (k1.dw + 2*k2.dw + 2*k3.dw + k4.dw) / 6,
         dr: (k1.dr + 2*k2.dr + 2*k3.dr + k4.dr) / 6,
-    }, rk4_step);
+    }, dt);
 }
