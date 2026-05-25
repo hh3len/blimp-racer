@@ -25,6 +25,10 @@ export function draw(state, target, score, timerStarted, startTime) {
     clearCanvas(ctxTop);
     clearCanvas(ctxSide);
 
+    // GRID
+    drawGrid(ctxTop, camX, camY);
+    drawGrid(ctxSide, camX, camZ);
+
     // TIMER
     drawHeader(ctxTop, timerStarted, startTime, score, state);
     drawHeader(ctxSide, timerStarted, startTime, score, state);
@@ -40,6 +44,28 @@ export function draw(state, target, score, timerStarted, startTime) {
     drawBody(ctxTop, canvasTop.width / 2, canvasTop.height / 2, state.psi);
     drawBody(ctxSide, canvasTop.width / 2, canvasTop.height / 2, state.psi);
 }
+
+// Works as intended
+function drawGrid(ctx, camX, camY, spacing = 50) {
+    ctx.strokeStyle = '#0e2a12';
+    ctx.lineWidth = 0.8;
+
+    // Vertical lines
+    for (let x = -camX; x < ctx.canvas.width; x += spacing) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, ctx.canvas.height);
+        ctx.stroke();
+    }
+
+    // Horiz lines
+    for (let y = -camY; y < ctx.canvas.height; y += spacing) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(ctx.canvas.width, y);
+        ctx.stroke();
+    }
+};
 
 // Works as intended
 function drawHeader(ctx, timerStarted, startTime, score, state) {
