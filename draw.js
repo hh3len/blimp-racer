@@ -203,65 +203,6 @@ function drawDetailsTop() {
 }
 
 // WIP
-function ds() {
-    function projectSide(point, angle) {
-        return {
-            px: point.x * Math.cos(angle) - point.y * Math.sin(angle),
-            py: -point.z  // negative because canvas Y is flipped
-        };
-    }
-
-    // Left fin
-    const leftFin = [
-        { x: -38, y: -16, z: 0 },
-        { x: -55, y: -42, z: 0 },
-        { x: -50, y: -10, z: 0 },
-    ];
-
-    // Right fin
-    const rightFin = [
-        { x: -38, y:  16, z: 0 },
-        { x: -55, y:  42, z: 0 },
-        { x: -50, y:  10, z: 0 },
-    ];
-
-    // Top fin
-    const topFin = [
-        { x: -38, y: 0, z:  0  },
-        { x: -55, y: 0, z: -30 },
-        { x: -50, y: 0, z: -10 },
-    ];
-
-    function drawFinSide(points, angle) {
-        const projected = points.map(p => projectSide(p, angle));
-        ctxSide.beginPath();
-        ctxSide.moveTo(projected[0].px, projected[0].py);
-        ctxSide.lineTo(projected[1].px, projected[1].py);
-        ctxSide.lineTo(projected[2].px, projected[2].py);
-        ctxSide.closePath();
-        ctxSide.fillStyle = '#0e4020';
-        ctxSide.fill();
-        ctxSide.strokeStyle = '#2bff7e';
-        ctxSide.lineWidth = 1;
-        ctxSide.stroke();
-    }
-
-    // nose tip in 3D
-    const noseTip = projectSide({ x: 55, y: 0, z: 0 }, angle);
-
-    // the visible half-length after foreshortening
-    const visibleLength = Math.abs(Math.cos(angle)) * 55;
-
-    ctxSide.beginPath();
-    ctxSide.moveTo(0, 0);
-    ctxSide.ellipse(0, 0, visibleLength, 22, 0, -Math.PI/6, Math.PI/6);
-    ctxSide.lineTo(noseTip.px, 0);
-    ctxSide.closePath();
-    ctxSide.fillStyle = '#ccffcc';
-    ctxSide.fill();
-}
-
-// 
 function drawDetailsSide(angle) {
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);
@@ -273,39 +214,56 @@ function drawDetailsSide(angle) {
         };
     }
 
-    // function drawFin(points) {
-    //     const p = points.map(([x,y,z]) => project(x, y, z));
-    //     ctxSide.beginPath();
-    //     ctxSide.moveTo(p[0].px, p[0].py);
-    //     ctxSide.lineTo(p[1].px, p[1].py);
-    //     ctxSide.lineTo(p[2].px, p[2].py);
-    //     ctxSide.closePath();
-    //     ctxSide.fillStyle = '#0e4020';
-    //     ctxSide.fill();
-    //     ctxSide.strokeStyle = '#2bff7e';
-    //     ctxSide.lineWidth = 1;
-    //     ctxSide.stroke();
-    // }
+    const v = 55 * Math.abs(Math.cos(angle)) + 22 * Math.abs(Math.sin(angle)); // Horizontal projection
 
-    // // Left fin — flat in Y (horizontal plane)
-    // drawFin([[-38, -16, 0], [-55, -42, 0], [-50, -10, 0]]);
+    // Clip outside of blimp
+    (() => {
+        ctxSide.save();
+        ctxSide.beginPath();
+        ctxSide.rect(-canvasSide.width/2, -canvasSide.height, canvasSide.width, canvasSide.height);
+        ctxSide.ellipse(0, 0, v, 22, 0, Math.PI * 2, 0);
+        ctxSide.clip("evenodd"); 
+    })();
 
-    // // Right fin — mirror of left
-    // drawFin([[-38,  16, 0], [-55,  42, 0], [-50,  10, 0]]);
+    function drawFin(points) {
+        const p = points.map(([x,y,z]) => project(x, y, z));
+        
+        ctxSide.beginPath();
+        ctxSide.moveTo(p[0].px, p[0].py);
+        p.shift();
 
-    // // Top fin — flat in X (vertical plane), always fully visible from side
-    // drawFin([[-38, 0, 0], [-55, 0, -30], [-50, 0, -10]]);
+        for (let i in p) {
+            ctxSide.lineTo(p[i].px, p[i].py);
+        }
+
+        ctxSide.closePath();
+        ctxSide.fillStyle = '#0e4020';
+        ctxSide.fill();
+        ctxSide.strokeStyle = '#2bff7e';
+        ctxSide.stroke();
+    }
+
+    // TOP FIN
+    drawFin([[-15, 0, 22], [-30, 0, 30], [-51, 0, 30], [-52, 0, 10]]);
+
+    ctxSide.restore();
 
     // NOSE HIGHLIGHT
-    const v = 55 * Math.abs(Math.cos(angle)) + 22 * Math.abs(Math.sin(angle)); // Horizontal projection
     const noseCenterX = v * Math.cos(angle); // X coordinate for tip of nose
     const noseCenterY = 0; // Assuming constant pitch
     const noseRadX = 55 - 55 * Math.cos(Math.PI/6); // Calculated using parameter t = Math.PI/6
     const noseRadY = 22 * Math.sin(Math.PI/6); // Constant
-
+    
     const noseLeftX = noseCenterX - noseRadX;
     const noseRightX = noseCenterX + noseRadX;
-
+    
+    // // Draw hull ellipse spanning both shapes
+    // const ellipseCenterX = noseLeftX * cos;
+    // const circleLeftEdge = noseCenterX - noseRadX;
+    // const circleRightEdge = noseCenterX + noseRadX;
+    // const ellipseLeftEdge  = ellipseCenterX - noseRadY * Math.abs(sin);
+    // const ellipseRightEdge  = ellipseCenterX + noseRadY * Math.abs(sin);
+    
     // Clip to blimp!
     (() => {
         ctxSide.save();
@@ -313,45 +271,14 @@ function drawDetailsSide(angle) {
         ctxSide.ellipse(0, 0, v, 22, 0, 0, Math.PI * 2);
         ctxSide.clip();
     })();
-
-    // draw the hull ellipse spanning both shapes
-    const ellipseCenterX = noseLeftX * cos;
-    const circleLeftEdge   = noseCenterX - noseRadX;
-    const circleRightEdge   = noseCenterX + noseRadX;
-    const ellipseLeftEdge  = ellipseCenterX - noseRadY * Math.abs(sin);
-    const ellipseRightEdge  = ellipseCenterX + noseRadY * Math.abs(sin);
-
+    
     // +Y is down (canvas convention), opposite of Cartesian coordinates
     if ((0 <= angle) && (angle <= Math.PI/2)) {
-        drawEllipse(noseLeftX * Math.cos(angle), 0, noseRadY * Math.sin(angle), noseRadY);
+        // drawEllipse(noseLeftX * Math.cos(angle), 0, noseRadY * Math.sin(angle), noseRadY);
         drawCircle(noseCenterX, noseCenterY, noseRadX, angle);
-
-        ctxSide.beginPath();
-
-        const hullLeft = Math.min(ellipseLeftEdge, circleLeftEdge);
-        const hullRight = Math.max(ellipseRightEdge, circleRightEdge);
-        const hullCenterX = (hullLeft + hullRight) / 2;
-        const hullRadiusX = (hullRight - hullLeft) / 2;
-
-        console.log("Left: " + hullLeft);
-        console.log("Right: " + hullRight);
-        console.log("Center: " + hullCenterX);
-        console.log("Rad: " + hullRadiusX);
-
-        ctxSide.ellipse(hullCenterX, 0, hullRadiusX, noseRadY, 0, 0, Math.PI * 2);
-        ctxSide.fill();
     } else if ((Math.PI/2 < angle) && (angle <= Math.PI)) {
-        drawEllipse(-noseRightX * Math.cos(angle), 0, noseRadY * Math.sin(angle), noseRadY, angle);
+        // drawEllipse(-noseRightX * Math.cos(angle), 0, noseRadY * Math.sin(angle), noseRadY, angle);
         drawCircle(noseCenterX, noseCenterY, noseRadX, angle);
-
-        ctxSide.beginPath();
-        const hullLeft = Math.min(ellipseLeftEdge, circleLeftEdge);
-        const hullRight = Math.max(ellipseRightEdge, circleRightEdge);
-        const hullCenterX = (hullLeft + hullRight) / 2;
-        const hullRadiusX = (hullLeft - hullRight) / 2;
-
-        ctxSide.ellipse(hullCenterX, 0, hullRadiusX, noseRadY, 0, 0, Math.PI * 2);
-        ctxSide.fill();
     }
 
     ctxSide.restore();
