@@ -7,7 +7,7 @@ let timerStarted = false;
 let startTime = null;
 let score = 0;
 
-let state = {
+let S = {
     x: 0, // global x position [px]
     y: 0, // global y position [px]
     z: 150, // global z posiion [px]
@@ -25,7 +25,7 @@ function newTarget() {
         z: Math.random() * (D.canvasSide.height) + 36 // Minimum z height
     };
 }
-let target = newTarget();
+let T = newTarget();
 
 // User-controlled inputs
 const keys = {
@@ -55,7 +55,7 @@ document.addEventListener('keyup', function(e) {
     if (e.key === 'ArrowRight') keys.right = false;
 });
 
-function gameLoop(timestamp) {
+function mainLoop(timestamp) {
     const F1 = keys.right ? P.F_lat : 0; // Right motor thrust
     const F2 = keys.left ? P.F_lat : 0; // Left motor thrust
     // Up key → positive Fz → positive dw → w increases → z increases → blimp rises & vice versa for down
@@ -64,40 +64,40 @@ function gameLoop(timestamp) {
     /* Fx (surge thrust)
      * Mz (differential torque)
      * Fz (heave thrust) */
-    const inp = {
+    const I = {
         Fx: F1 + F2,
         Mz: (F1 - F2) * P.ly,
         Fz: Fz,
     };
 
     // Compute & update state
-    state = rk4(state, inp);
+    S = rk4(S, I);
 
     // Wrap heading to [-pi, pi]
-    state.psi = ((state.psi + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
+    S.psi = ((S.psi + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
 
     // Clamp z to be above ground
-    if (state.z < 22) {
-        state.z = 22;
-        state.w = Math.max(0.5, state.w); // Possibly implement CBF here
+    if (S.z < 22) {
+        S.z = 22;
+        S.w = Math.max(0.5, S.w); // Possibly implement CBF here
     }
 
     // Check if ship is within capture radius
-    const dx = target.x - state.x;
-    const dy = target.y - state.y;
-    const dz = target.z - state.z;
+    const dx = T.x - S.x;
+    const dy = T.y - S.y;
+    const dz = T.z - S.z;
     const captured = 30;
 
     const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
     if (dist < captured) {
         score++;
-        target = newTarget();
+        T = newTarget();
     }      
 
-    D.draw(state, target);
-    DISP.updateHUD(state, inp, target, score);
-    requestAnimationFrame(gameLoop);
+    D.draw(S, T);
+    DISP.updateHUD(S, T, I, score, timerStarted, startTime);
+    requestAnimationFrame(mainLoop);
 }
 
 // Game loop
-requestAnimationFrame(gameLoop);
+requestAnimationFrame(mainLoop);
