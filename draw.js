@@ -47,6 +47,24 @@ export function draw(state, target, score, timerStarted, startTime) {
 
 // Works as intended
 function drawGrid(ctx, camX, camY, spacing = 50) {
+    // Draw origin crosshairs for top view
+    if (ctx == ctxTop) {
+        const ox = ctx.canvas.width / 2 - camX;
+        const oy = ctx.canvas.height / 2 - camY;
+
+        ctx.save();
+        ctx.strokeStyle = '#2bff7e';
+
+        ctx.beginPath();
+        ctx.moveTo(ox - 12, oy);
+        ctx.lineTo(ox + 12, oy);
+        ctx.moveTo(ox, oy - 12);
+        ctx.lineTo(ox, oy + 12);
+        ctx.stroke();
+
+        ctx.restore(); 
+    }
+
     ctx.strokeStyle = '#0e2a12';
     ctx.lineWidth = 0.8;
 

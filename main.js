@@ -64,7 +64,7 @@ function gameLoop() {
     };
 
     // Compute & update state
-    state = rk4(state, inp, 0.025);
+    state = rk4(state, inp);
 
     // Wrap heading to [-pi, pi]
     state.psi = ((state.psi + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
