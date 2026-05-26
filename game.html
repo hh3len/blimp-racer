@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8"/>
+  <title>Airship Racer</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&display=swap"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+
+<body>
+  <header>
+    <h1>AMASS AIRSHIP // INTERACTIVE SIM</h1>
+  </header>
+
+  <div id="main">
+    <div id="canvas">
+      <div class="canvas-panel" data-label="TOP VIEW  (X–Y)">
+        <canvas id="cvTop"></canvas>
+      </div>
+
+      <div class="canvas-panel" data-label="SIDE VIEW  (X–Z)">
+        <canvas id="cvSide"></canvas>
+      </div>
+    </div>
+
+    <div id="sidebar">
+      <div class="disp-block">
+          <h3> VEHICLE STATUS </h3>
+            <div class="state-row"><span class="state-label">X [m]</span> <span class="state-val" id="x">+0.00</span></div>
+            <div class="state-row"><span class="state-label">Y [m]</span> <span class="state-val" id="y">+0.00</span></div>
+            <div class="state-row"><span class="state-label">Z [m]</span> <span class="state-val" id="z">+0.00</span></div>
+            <div class="state-row"><span class="state-label">HEADING [°]</span> <span class="state-val" id="psi">+0.00</span></div>
+            <div class="state-row"><span class="state-label">W [m/s]</span> <span class="state-val" id="w">+0.00</span></div>
+            <div class="state-row"><span class="state-label">R [m/s]</span> <span class="state-val" id="r">+0.00</span></div>
+            <div class="state-row"><span class="state-label">U [m/s]</span> <span class="state-val" id="u">+0.00</span></div>
+      </div>
+
+      <div class="disp-block">
+        <h3> MOTORS </h3>
+        
+        <div class="motor-row"><div class="motor-label">M1 LEFT</div>
+          <div class="motor-bar"><div class="motor-fill" id="m1"></div></div>
+        </div>
+
+        <div class="motor-row"><div class="motor-label">M2 RIGHT</div>
+          <div class="motor-bar"><div class="motor-fill" id="m2"></div></div>
+        </div>
+
+        <div class="motor-row"><div class="motor-label">M3 VERT</div>
+          <div class="motor-bar"><div class="motor-fill" id="m3"></div></div>
+        </div>
+      </div>
+      
+      <div class="disp-block">
+        <h3> TARGET </h3>
+          <!-- <div class="state-row"><span class="state-label">dX [m]</span> <span class="state-val" id="dx">+0.00</span></div>
+          <div class="state-row"><span class="state-label">dY [m]</span> <span class="state-val" id="dy">+0.00</span></div> -->
+          <div class="state-row"><span class="state-label">DIST [m]</span> <span class="state-val" id="dist">+0.00</span></div>
+          <div class="state-row"><span class="state-label">dZ [m]</span> <span class="state-val" id="dz">+0.00</span></div>
+          <div class="state-row"><span class="state-label">BEARING [°]</span> <span class="state-val" id="brg">+0.0</span></div>
+      </div>
+
+      <div class="disp-block">
+        <h3> SCORE </h3>
+          <div class="score" id="score">0</div>
+          <div class="score-txt">TARGETS HIT</div>
+      </div>
+
+      <div class="disp-block">
+        <h3> SYSTEM </h3>
+        <div id="time-elapsed">T+00:00</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span> AIRSHIP CONTROLLER SIM DEMO v11.38</span>
+    <span> H. LING </span>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+
+</html>

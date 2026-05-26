@@ -1,7 +1,7 @@
 import {P, derivatives, rk4} from './physics.js';
 import * as U from './utils.js';
 import * as CV from './canvas.js';
-import * as SB from './sidebar.js';
+import * as SB from '../sidebar.js';
 
 // Initialize scoreboard, state, and target
 let timerStarted = false;
@@ -27,6 +27,67 @@ function newTarget() {
     };
 }
 let T = newTarget();
+
+// Game states
+const LEVEL = {
+    TUTORIAL: 'tutorial',
+    EASY: 'easy',
+    HARD: 'hard',
+    CHALLENGE: 'challenge',
+    RESULTS: 'results',
+};
+
+let gameLevel = LEVEL.TUTORIAL;
+let tutorialStep = 0;
+
+
+// Tutorial script
+const TUTORIAL_STEPS = [
+    {
+        text: ['WELCOME TO THE AMASS AIRSHIP SIMULATOR',
+               'Think you have what it takes to be a pilot?',
+               '',
+               'Press SPACE to continue'],
+        action: 'space', // Advance
+        lock: true, // Pause controls
+    },
+    {
+        text: ['YAW + SURGE',
+               'Press LEFT / RIGHT to rotate',
+               'and thrust forward.',
+               '',
+               'Hit the target to continue'],
+        action: 'capture', // Advance
+        lock: false,
+        targetPos: { x: 2, y: 0, z: 1.0 },  // fixed position in metres
+    },
+    {
+        text: ['ALTITUDE',
+               'Press UP to rise, DOWN to sink.',
+               '',
+               'Hit the target to continue'],
+        action: 'capture',
+        lock: false,
+        targetPos: { x: 0, y: 0, z: 2.5 },  // high target forces altitude change
+    },
+    {
+        text: ['COMBINED CONTROLS',
+               'Use all controls together.',
+               'Hit the target to continue'],
+        action: 'capture',
+        lock: false,
+        targetPos: null,       // random
+    },
+    {
+        text: ['YOU\'RE READY TO FLY',
+               'Complete each level as fast as possible.',
+               'Stay close to the path for a score multiplier.',
+               '',
+               'Press SPACE to begin'],
+        action: 'space',
+        lock: true,
+    },
+];
 
 // User-controlled inputs
 const keys = {
