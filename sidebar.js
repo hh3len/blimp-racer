@@ -1,7 +1,7 @@
 import {P} from './physics.js';
 import * as U from './utils.js';
 
-export function updateHUD(state, target, input, score, timerStarted, t) {
+export function updateSB(state, target, input, score, timerStarted, t) {
     // VEHICLE
     document.getElementById('x').textContent = U.format(state.x / P.SCALE);
     document.getElementById('y').textContent = U.format(state.y / P.SCALE);

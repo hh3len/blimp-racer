@@ -1,6 +1,6 @@
 import {P, derivatives, rk4} from './physics.js';
-import * as D from './draw.js';
-import * as DISP from './display.js';
+import * as CV from './canvas.js';
+import * as SB from './sidebar.js';
 
 // Initialize scoreboard, state, and target
 let timerStarted = false;
@@ -20,9 +20,9 @@ let S = {
 // Generate & define random target
 function newTarget() {
     return {
-        x: Math.random() * (D.canvasTop.width),
-        y: Math.random() * (D.canvasTop.height),
-        z: Math.random() * (D.canvasSide.height) + 36 // Minimum z height
+        x: Math.random() * (CV.canvasTop.width),
+        y: Math.random() * (CV.canvasTop.height),
+        z: Math.random() * (CV.canvasSide.height) + 36 // Minimum z height
     };
 }
 let T = newTarget();
@@ -94,8 +94,8 @@ function mainLoop(timestamp) {
         T = newTarget();
     }      
 
-    D.draw(S, T);
-    DISP.updateHUD(S, T, I, score, timerStarted, startTime);
+    CV.draw(S, T);
+    SB.updateSB(S, T, I, score, timerStarted, startTime);
     requestAnimationFrame(mainLoop);
 }
 

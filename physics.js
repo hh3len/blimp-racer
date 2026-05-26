@@ -1,4 +1,4 @@
-import * as D from './draw.js';
+import * as C from './canvas.js';
 
 /* Physical constants from:
 * Sponaugle, Austin Lane, "Reactive Model-Free Control for Underactuated Vehicles Operating in Resource-Constrained Environments" (2025). 
@@ -15,7 +15,7 @@ export const P = {
     F_lat: 0.40, // lateral thrust per key press [N]
     F_vert: 0.55, // vertical thrust per key press [N]
     F_max: 1.07, // maximum motor force [N]
-    SCALE: D.canvasSide.height / 2, // pixels per meter
+    SCALE: C.canvasSide.height / 2, // pixels per meter
 };
 
 /** Compute rates of change for each state variable:

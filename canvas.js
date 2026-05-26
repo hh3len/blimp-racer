@@ -7,6 +7,17 @@ export const ctxTop = canvasTop.getContext('2d');
 export const canvasSide = document.getElementById('cvSide');
 export const ctxSide = canvasSide.getContext('2d');
 
+function resizeCanvases() {
+    const topPanel = canvasTop.parentElement;
+    const sidePanel = canvasSide.parentElement;
+    canvasTop.width = topPanel.clientWidth;
+    canvasTop.height  = topPanel.clientHeight;
+    canvasSide.width  = sidePanel.clientWidth;
+    canvasSide.height = sidePanel.clientHeight;
+}
+window.addEventListener('resize', resizeCanvases);
+resizeCanvases();
+
 export function draw(state, target) {
     // Flip z-axis
     const canvasZ = canvasSide.height - state.z;
