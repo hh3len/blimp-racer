@@ -195,37 +195,45 @@ function drawDetailsTop() {
     ctxTop.fillStyle = COLOR.nose;
     ctxTop.fill();
 
+    // Clip outside of blimp
+    (() => {
+        ctxTop.save();
+        ctxTop.beginPath();
+        ctxTop.rect(-canvasTop.width, -canvasTop.height, canvasTop.width * 2, canvasTop.height * 2);
+        ctxTop.ellipse(0, 0, va, vb, 0, 0, Math.PI * 2);
+        ctxTop.clip("evenodd"); 
+    })();
+
     // L/R fins
-    ctxTop.beginPath();
-    // vb =
-    ctxTop.moveTo(-vb + 10, -vb);
-    console.log(va, vb)
-    ctxTop.lineTo(-30, -30);
-    ctxTop.lineTo(-51, -30);
-    ctxTop.lineTo(-52, -10);
-    ctxTop.lineTo(-50, -12);
-
-    ctxTop.moveTo(-15, vb);
-    ctxTop.lineTo(-30, 30);
-    ctxTop.lineTo(-51, 30);
-    ctxTop.lineTo(-52, 10);
-    ctxTop.lineTo(-50, 12);
-
-    ctxTop.closePath();
     ctxTop.fillStyle = COLOR.fin;
-    ctxTop.fill();
     ctxTop.lineCap = "round";
     ctxTop.strokeStyle = COLOR.grn;
     ctxTop.lineWidth = 1;
+
+    ctxTop.beginPath();
+    ctxTop.moveTo(-22, -vb);
+    ctxTop.lineTo(-44, -44);
+    ctxTop.lineTo(-74, -44);
+    ctxTop.lineTo(-75, -11);
+
+    ctxTop.moveTo(-22, vb);
+    ctxTop.lineTo(-44, 44);
+    ctxTop.lineTo(-74, 44);
+    ctxTop.lineTo(-75, 11);
+    ctxTop.closePath();
+
+    ctxTop.fill();
     ctxTop.stroke();
+
+    ctxTop.restore();
 
     // Top fin
     ctxTop.beginPath();
-    ctxTop.moveTo(-16, 0);
-    ctxTop.lineTo(-50, 0);
-    ctxTop.lineTo(-16, -2);
-    ctxTop.moveTo(-50, 0);
-    ctxTop.lineTo(-16, 2);
+    ctxTop.moveTo(-22, 0);
+    ctxTop.lineTo(-73, 0);
+    ctxTop.lineTo(-22, -3);
+    ctxTop.moveTo(-73, 0);
+    ctxTop.lineTo(-22, 3);
     ctxTop.lineWidth = 2.75;
     ctxTop.stroke();
 }
@@ -248,7 +256,7 @@ function drawDetailsSide(angle) {
     (() => {
         ctxSide.save();
         ctxSide.beginPath();
-        ctxSide.rect(-canvasSide.width/2, -canvasSide.height, canvasSide.width, canvasSide.height);
+        ctxSide.rect(-canvasSide.width, -canvasSide.height, canvasSide.width * 2, canvasSide.height * 2);
         ctxSide.ellipse(0, 0, v, vb, 0, Math.PI * 2, 0);
         ctxSide.clip("evenodd"); 
     })();
@@ -271,8 +279,7 @@ function drawDetailsSide(angle) {
     }
 
     // TOP FIN
-    drawFin([[-15, 0, vb], [-30, 0, 30], [-51, 0, 30], [-52, 0, 10]]);
-
+    drawFin([[-22, 0, vb], [-44, 0, 44], [-74, 0, 44], [-75, 0, 14]]);
     ctxSide.restore();
 
     // NOSE HIGHLIGHT
@@ -280,9 +287,9 @@ function drawDetailsSide(angle) {
     const noseCenterY = 0; // Assuming constant pitch
     const noseRadX = va - va * Math.cos(Math.PI/6); // Calculated using parameter t = Math.PI/6
     const noseRadY = vb * Math.sin(Math.PI/6); // Constant
-    
     const noseLeftX = noseCenterX - noseRadX;
     const noseRightX = noseCenterX + noseRadX;
+    console.log(noseRadY);
     
     // // Draw hull ellipse spanning both shapes
     // const ellipseCenterX = noseLeftX * cos;
@@ -302,12 +309,11 @@ function drawDetailsSide(angle) {
     // +Y is down (canvas convention), opposite of Cartesian coordinates
     if ((0 <= angle) && (angle <= Math.PI/2)) {
         // drawEllipse(noseLeftX * Math.cos(angle), 0, noseRadY * Math.sin(angle), noseRadY);
-        drawCircle(noseCenterX, noseCenterY, noseRadX, angle);
     } else if ((Math.PI/2 < angle) && (angle <= Math.PI)) {
         // drawEllipse(-noseRightX * Math.cos(angle), 0, noseRadY * Math.sin(angle), noseRadY, angle);
-        drawCircle(noseCenterX, noseCenterY, noseRadX, angle);
     }
-
+    
+    drawCircle(noseCenterX, noseCenterY, noseRadY);
     ctxSide.restore();
 }
 
@@ -321,7 +327,7 @@ function drawEllipse(x, y, a, b) {
     ctxSide.stroke();
 }
 
-function drawCircle(x, y, r, angle) {
+function drawCircle(x, y, r) {
     ctxSide.beginPath();
     ctxSide.arc(x, y, r, 0, Math.PI * 2);
     ctxSide.closePath();
