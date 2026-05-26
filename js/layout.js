@@ -1,4 +1,4 @@
-export function insertNav(activePage) {
+export function rootLayout(activePage) {
     const nav = document.createElement('nav');
     nav.id = 'nav';
     nav.innerHTML = `
@@ -11,5 +11,13 @@ export function insertNav(activePage) {
             <a href="settings.html" class="${activePage === 'settings' ? 'active' : ''}">SETTINGS</a>
         </div>
     `;
+
     document.body.prepend(nav);
+
+    const footer = document.createElement('footer');
+    footer.innerHTML = `
+        <span>AIRSHIP FLIGHT SIMULATOR v0.11.34</span>
+        <span>H. LING</span>
+    `;
+    document.body.append(footer);
 }

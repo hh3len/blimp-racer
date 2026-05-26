@@ -146,6 +146,138 @@
     }
 }
 
+/* LEVELS PAGE */
+#levels {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    padding: 40px 18px;
+    gap: 32px;
+}
+
+.levels-title {
+    font-family: var(--title);
+    font-size: clamp(1rem, 3vw, 1.4rem);
+    letter-spacing: 0.2em;
+    padding: 5px;
+    text-shadow: 0 0 20px var(--G);
+}
+
+.levels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    width: 100%;
+    max-width: 1000px;
+}
+
+.level-card {
+    background: var(--panel);
+    border: 1px solid var(--darkG);
+    border-radius: 2px;
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-decoration: none;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+}
+
+.level-card:hover {
+    border-color: var(--G);
+    box-shadow: 0 0 20px #2bff7e11;
+}
+
+.level-card.locked {
+    opacity: 0.4;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.level-card::before {
+    content: attr(data-number);
+    position: absolute;
+    top: 15px;
+    right: 18px;
+    
+    font-family: var(--title);
+    font-size: 4rem;
+    font-weight: 900;
+    color: var(--G);
+    line-height: 1;
+    pointer-events: none;
+}
+
+.level-tag {
+    font-size: 0.5rem;
+    letter-spacing: 0.2em;
+    color: var(--darkG);
+    border: 1px solid var(--darkG);
+    padding: 2px 6px;
+    border-radius: 1px;
+    margin: 34px 0 0;
+    width: fit-content;
+}
+
+.level-name {
+    font-family: var(--title);
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    border-top: 1px solid var(--G);
+    padding-top: 6px;
+    color: var(--G);
+}
+
+.level-desc {
+    font-size: 0.67rem;
+    color: var(--darkG);
+    line-height: 1.5;
+}
+
+.level-features {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.level-feature {
+    font-size: 0.62rem;
+    color: var(--darkG);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.level-feature::before {
+    content: '▸';
+    color: var(--midG);
+}
+
+.level-best {
+    font-size: 0.62rem;
+    color: var(--darkG);
+    border-top: 1px solid var(--G);
+    padding-top: 10px;
+    margin-top: auto;
+}
+
+.level-best span {
+    color: var(--G);
+}
+
+.level-locked-tag {
+    font-size: 0.58rem;
+    letter-spacing: 0.15em;
+    color: var(--darkG);
+    text-align: center;
+    margin-top: auto;
+}
+
 /* GAME DISPLAY */
 body {
     display: flex;
@@ -153,6 +285,7 @@ body {
     align-items: center;
     user-select: none;
     overflow: hidden;
+    min-height: 100vh;
 
     padding: 10px;
     gap: 10px;
@@ -197,6 +330,7 @@ body {
       justify-content: center;
       gap: 10px;
       padding: 10px 18px;
+      flex: 1;
     }
 
     /* CANVAS */
@@ -276,7 +410,7 @@ body {
 
     .motor-label { 
       font-size: 0.67rem; 
-      color: var(--disp); 
+      color: var(--motor); 
       margin-bottom: 2px; 
       align-self: center;
     }

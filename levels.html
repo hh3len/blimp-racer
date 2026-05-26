@@ -3,18 +3,86 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Levels</title>
+    <title> Levels | AMASS Airship Sim</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&display=swap"/>
     <link rel="stylesheet" href="style.css"/>
 </head>
+
 <body>
-    <main id="home">
-        <h1>placeholder</h1>
+    <main id="levels">
+        <h2 class="levels-title">LEVEL SELECTION</h2>
+
+        <div class="levels-grid">
+
+            <a href="game.html?level=tutorial" class="level-card" data-number="01">
+                <span class="level-tag">TUTORIAL</span>
+                <div class="level-name">FREE FLIGHT</div>
+                <div class="level-desc">
+                    Learn to pilot the AMASS Lab's research blimp!
+                </div>
+                <div class="level-features">
+                    <div class="level-feature">Untimed</div>
+                    <div class="level-feature">Untimed</div>
+                    <div class="level-feature">Untimed</div>
+                </div>
+                <div class="level-best">
+                    BEST — <span id="best-tutorial">--:--</span>
+                </div>
+            </a>
+
+            <a href="game.html?level=easy" class="level-card" data-number="02">
+                <span class="level-tag">MODE</span>
+                <div class="level-name">BEGINNER</div>
+                <div class="level-desc">
+                    Follow a guided path through a series of checkpoints as fast as possible.
+                </div>
+                <div class="level-features">
+                    <div class="level-feature">Timed</div>
+                    <div class="level-feature">Timed</div>
+                    <div class="level-feature">Timed</div>
+                </div>
+                <div class="level-best">
+                    BEST — <span id="best-easy">--:--</span>
+                </div>
+            </a>
+
+            <a href="game.html?level=hard" class="level-card" data-number="03">
+                <span class="level-tag">MODE</span>
+                <div class="level-name">INTERMEDIATE</div>
+                <div class="level-desc">
+                    Navigate to checkpoints using only your instruments.
+                </div>
+                <div class="level-features">
+                    <div class="level-feature">Timed</div>
+                    <div class="level-feature">Timed</div>
+                    <div class="level-feature">Timed</div>
+                </div>
+                <div class="level-best">
+                    BEST — <span id="best-hard">--:--</span>
+                </div>
+            </a>
+
+            <a href="game.html?level=challenge" class="level-card" data-number="04">
+                <span class="level-tag">MODE</span>
+                <div class="level-name">CHALLENGE</div>
+                <div class="level-desc">
+                    Follow an autonomous leader blimp through a predefined route.
+                </div>
+                <div class="level-features">
+                    <div class="level-feature">Timed</div>
+                    <div class="level-feature">Timed</div>
+                    <div class="level-feature">Timed</div>
+                </div>
+                <div class="level-best">
+                    BEST — <span id="best-challenge">--:--</span>
+                </div>
+            </a>
+        </div>
     </main>
 
     <script type="module">
-        import { insertNav } from './js/nav.js';
-        insertNav('levels');
+        import { rootLayout } from './js/layout.js';
+        rootLayout('levels');
     </script>
 </body>
 </html>
