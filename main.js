@@ -1,21 +1,32 @@
-import {P, newTarget, derivatives, rk4} from './physics.js';
-import * as D from './draw.js';
+import {P, derivatives, rk4} from './physics.js';
+import * as U from './utils.js';
+import * as CV from './canvas.js';
+import * as SB from './sidebar.js';
 
 // Initialize scoreboard, state, and target
 let timerStarted = false;
 let startTime = null;
 let score = 0;
-let target = newTarget();
 
-let state = {
-    x: 250, // global x position [pixels]
-    y: 150, // global y position [pixels]
-    z: 120, // global z posiion [pixels]
-    psi: 0, // heading [rad]
-    u: 0, // surge velocity [m/s]
-    w: 0, // heave velocity [m/s]
-    r: 0, // yaw velocity [rad/s]
+let S = {
+    x: 0.0, // global x position [m]
+    y: 0.0, // global y position [m]
+    z: 1.0, // global z posiion [m]
+    psi: 0.0, // heading [rad]
+    u: 0.0, // surge velocity [m/s]
+    w: 0.0, // heave velocity [m/s]
+    r: 0.0, // yaw velocity [rad/s]
 };
+
+// Generate & define random target
+function newTarget() {
+    return {
+        x: (Math.random() - 0.5) * 6,
+        y: (Math.random() - 0.5) * 6,
+        z: Math.random() * 3 + 0.5 // Minimum z height
+    };
+}
+let T = newTarget();
 
 // User-controlled inputs
 const keys = {
@@ -26,9 +37,9 @@ const keys = {
 };
 
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'ArrowUp')    keys.up    = true;
-    if (e.key === 'ArrowDown')  keys.down  = true;
-    if (e.key === 'ArrowLeft')  keys.left  = true;
+    if (e.key === 'ArrowUp') keys.up = true;
+    if (e.key === 'ArrowDown') keys.down = true;
+    if (e.key === 'ArrowLeft') keys.left = true;
     if (e.key === 'ArrowRight') keys.right = true;
     e.preventDefault();
 
@@ -39,57 +50,50 @@ document.addEventListener('keydown', function(e) {
 });
 
 document.addEventListener('keyup', function(e) {
-    if (e.key === 'ArrowUp')    keys.up    = false;
-    if (e.key === 'ArrowDown')  keys.down  = false;
-    if (e.key === 'ArrowLeft')  keys.left  = false;
+    if (e.key === 'ArrowUp') keys.up = false;
+    if (e.key === 'ArrowDown') keys.down = false;
+    if (e.key === 'ArrowLeft') keys.left = false;
     if (e.key === 'ArrowRight') keys.right = false;
 });
 
-function gameLoop() {
-    const F1 = keys.right ? P.F_lat : 0; // Right motor thrust
-    const F2 = keys.left ? P.F_lat : 0; // Left motor thrust
+function mainLoop(timestamp) {
+    const F1 = keys.left ? P.F_step : 0;
+    const F2 = keys.right ? P.F_step : 0;
+    
+    // Up = positive Fz = positive dw = w increases = z increases = blimp rises & vice versa for down
+    const Fz = (keys.up ? P.F_step_v : 0) - (keys.down ? P.F_step_v : 0);
 
-    // Up key → positive Fz → positive dw → w increases → z increases → blimp rises & vice versa for down
-    const Fz = (keys.up ? P.F_vert : 0) - (keys.down ? P.F_vert : 0);
-
-    /** Calculate & save inputs:
-     * Fx (surge thrust)
+    /* Fx (surge thrust)
      * Mz (differential torque)
-     * Fz (heave thrust)
-    */
-    const inp = {
-        Fx: F1 + F2,
+     * Fz (heave thrust) */
+    const I = {
+        F1, F2, Fx: F1 + F2,
         Mz: (F1 - F2) * P.ly,
-        Fz: Fz,
+        Fz
     };
 
     // Compute & update state
-    state = rk4(state, inp);
+    S = rk4(S, I);
 
     // Wrap heading to [-pi, pi]
-    state.psi = ((state.psi + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
-    
+    S.psi = ((S.psi + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
 
-    // Clamp z to be above ground
-    if (state.z < 0) {
-        state.z = 0;
-        state.w = Math.max(0, state.w);
+    // Clamp z to be entirely above ground
+    if (S.z < P.b) {
+        S.z = P.b;
+        S.w = Math.max(0.2, S.w); // Possibly implement CBF here
     }
 
-    // Check if captured
-    const dx = target.x - state.x;
-    const dy = target.y - state.y;
-    const dz = target.z - state.z;
-
-    const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
-    if (dist < 30) {
+    // Check if ship is within capture radius
+    if (U.dist(S, T).dist < P.CAPTURE_RAD) {
         score++;
-        target = newTarget();
-    }      
+        T = newTarget();
+    }
 
-    D.draw(state, target, score, timerStarted, startTime);
-    requestAnimationFrame(gameLoop);
+    CV.draw(S, T);
+    SB.updateSB(S, T, I, score, timerStarted, startTime);
+    requestAnimationFrame(mainLoop);
 }
 
 // Game loop
-requestAnimationFrame(gameLoop);
+requestAnimationFrame(mainLoop);
