@@ -121,7 +121,7 @@ function drawGrid(ctx, camX, camY, spacing = va) {
 
         ctx.fillRect(0, ctx.canvas.height - camY, ctx.canvas.width, ctx.canvas.height);
 
-        ctx.textAlign = 'left'; ctx.font = '0.8rem Share Tech Mono'; ctx.fillStyle = COLOR.grnDim;
+        ctx.textAlign = 'left'; ctx.font = '0.8rem Share Tech Mono'; ctx.fillStyle = COLOR.darkG;
         ctx.fillText('GROUND', 5, ctx.canvas.height - camY + 15); 
         
         ctx.restore();
