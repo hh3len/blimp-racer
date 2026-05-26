@@ -1,4 +1,5 @@
 import {P, derivatives, rk4} from './physics.js';
+import * as U from './utils.js';
 import * as CV from './canvas.js';
 import * as SB from './sidebar.js';
 
@@ -8,21 +9,21 @@ let startTime = null;
 let score = 0;
 
 let S = {
-    x: 0, // global x position [px]
-    y: 0, // global y position [px]
-    z: 150, // global z posiion [px]
-    psi: 0, // heading [rad]
-    u: 0, // surge velocity [m/s]
-    w: 0, // heave velocity [m/s]
-    r: 0, // yaw velocity [rad/s]
+    x: 0.0, // global x position [m]
+    y: 0.0, // global y position [m]
+    z: 1.0, // global z posiion [m]
+    psi: 0.0, // heading [rad]
+    u: 0.0, // surge velocity [m/s]
+    w: 0.0, // heave velocity [m/s]
+    r: 0.0, // yaw velocity [rad/s]
 };
 
 // Generate & define random target
 function newTarget() {
     return {
-        x: Math.random() * (CV.canvasTop.width),
-        y: Math.random() * (CV.canvasTop.height),
-        z: Math.random() * (CV.canvasSide.height) + 36 // Minimum z height
+        x: (Math.random() - 0.5) * 6,
+        y: (Math.random() - 0.5) * 6,
+        z: Math.random() * 3 + 0.5 // Minimum z height
     };
 }
 let T = newTarget();
@@ -56,18 +57,19 @@ document.addEventListener('keyup', function(e) {
 });
 
 function mainLoop(timestamp) {
-    const F1 = keys.right ? P.F_lat : 0; // Right motor thrust
-    const F2 = keys.left ? P.F_lat : 0; // Left motor thrust
-    // Up key → positive Fz → positive dw → w increases → z increases → blimp rises & vice versa for down
-    const Fz = (keys.up ? P.F_vert : 0) - (keys.down ? P.F_vert : 0);
+    const F1 = keys.left ? P.F_step : 0;
+    const F2 = keys.right ? P.F_step : 0;
+    
+    // Up = positive Fz = positive dw = w increases = z increases = blimp rises & vice versa for down
+    const Fz = (keys.up ? P.F_step_v : 0) - (keys.down ? P.F_step_v : 0);
 
     /* Fx (surge thrust)
      * Mz (differential torque)
      * Fz (heave thrust) */
     const I = {
-        Fx: F1 + F2,
+        F1, F2, Fx: F1 + F2,
         Mz: (F1 - F2) * P.ly,
-        Fz: Fz,
+        Fz
     };
 
     // Compute & update state
@@ -76,23 +78,17 @@ function mainLoop(timestamp) {
     // Wrap heading to [-pi, pi]
     S.psi = ((S.psi + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
 
-    // Clamp z to be above ground
-    if (S.z < 22) {
-        S.z = 22;
-        S.w = Math.max(0.5, S.w); // Possibly implement CBF here
+    // Clamp z to be entirely above ground
+    if (S.z < P.b) {
+        S.z = P.b;
+        S.w = Math.max(0.2, S.w); // Possibly implement CBF here
     }
 
     // Check if ship is within capture radius
-    const dx = T.x - S.x;
-    const dy = T.y - S.y;
-    const dz = T.z - S.z;
-    const captured = 30;
-
-    const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
-    if (dist < captured) {
+    if (U.dist(S, T).dist < P.CAPTURE_RAD) {
         score++;
         T = newTarget();
-    }      
+    }
 
     CV.draw(S, T);
     SB.updateSB(S, T, I, score, timerStarted, startTime);

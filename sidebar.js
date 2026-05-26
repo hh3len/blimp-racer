@@ -3,30 +3,26 @@ import * as U from './utils.js';
 
 export function updateSB(state, target, input, score, timerStarted, t) {
     // VEHICLE
-    document.getElementById('x').textContent = U.format(state.x / P.SCALE);
-    document.getElementById('y').textContent = U.format(state.y / P.SCALE);
-    document.getElementById('z').textContent = U.format(state.z / P.SCALE);
+    document.getElementById('x').textContent = U.format(state.x);
+    document.getElementById('y').textContent = U.format(state.y);
+    document.getElementById('z').textContent = U.format(state.z);
     document.getElementById('psi').textContent = U.format(U.radToDeg(state.psi)) + '°';
     document.getElementById('u').textContent = U.format(state.u);
     document.getElementById('w').textContent = U.format(state.w);
     document.getElementById('r').textContent = U.format(state.r);
 
     // MOTORS
-    document.getElementById('mb1').style.width = Math.min(input.F1 / P.F_max, 1) * 100 + '%';
-    document.getElementById('mb2').style.width = Math.min(input.F2 / P.F_max, 1) * 100 + '%';
-    document.getElementById('mb3').style.width = Math.min(Math.abs(input.Fz) / P.F_vert, 1) * 100 + '%';
+    document.getElementById('m1').style.width = Math.min(input.F1 / P.F_max, 1) * 100 + '%';
+    document.getElementById('m2').style.width = Math.min(input.F2 / P.F_max, 1) * 100 + '%';
+    document.getElementById('m3').style.width = Math.min(Math.abs(input.Fz) / P.F_max, 1) * 100 + '%';
 
     // TARGET
-    const dx = target.x - state.x;
-    const dy = target.y - state.y;
-    const dz = target.z - state.z;
-    const dist = Math.sqrt(dx*dx + dy*dy + dz*dz) / P.SCALE;
-    const brg  = Math.atan2(dy, dx) * 180 / Math.PI;
+    // document.getElementById('dx').textContent = U.format(U.dist(target, state).dx);
+    // document.getElementById('dy').textContent = U.format(U.dist(target, state).dy);
+    document.getElementById('dz').textContent = U.format(U.dist(target, state).dz);
 
-    document.getElementById('dx').textContent = U.format(dx / P.SCALE);
-    document.getElementById('dy').textContent = U.format(dy / P.SCALE);
-    document.getElementById('dz').textContent = U.format(dz / P.SCALE);
-    document.getElementById('brg').textContent = U.format(brg) + '°';
+    document.getElementById('dist').textContent = U.format(U.dist(target, state).dist2D);
+    document.getElementById('brg').textContent = U.format(U.dist(target, state).brg) + '°';
 
     // SCORE
     document.getElementById('score').textContent = score;

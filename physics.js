@@ -1,21 +1,30 @@
-import * as C from './canvas.js';
-
 /* Physical constants from:
 * Sponaugle, Austin Lane, "Reactive Model-Free Control for Underactuated Vehicles Operating in Resource-Constrained Environments" (2025). 
 * Graduate Theses, Dissertations, and Problem Reports. 12996. https://researchrepository.wvu.edu/etd/12996
 */
 export const P = {
+    // Mass coefficients
     m_surge: 0.460 + 0.1091, // effective surge mass [kg]
     m_heave: 0.460 + 0.3120, // effective heave mass [kg]
     Iz: 0.0873 + 0.0197, // effective yaw inertia [kg*m^2]
+
+    // Damping coefficients
     Xu: 0.1900, // surge damping [kg/s]
     Zw: 0.3366, // heave damping [kg/s]
     Nr: 0.2450, // yaw damping [kg*m^2/s]
     ly: 0.461, // lateral motor moment arm [m]
-    F_lat: 0.40, // lateral thrust per key press [N]
-    F_vert: 0.55, // vertical thrust per key press [N]
-    F_max: 1.07, // maximum motor force [N]
-    SCALE: C.canvasSide.height / 2, // pixels per meter
+
+    // Ship geometry
+    a: 0.918, // x (semi-major) axis [m]
+    b: 0.372, // y & z (semi-minor) axes [m]
+
+    // Animation constants
+    F_step: 0.4, // lateral thrust per key press [N]
+    F_step_v: 0.5, // vertical thrust per key press [N]
+    F_max: 0.75, // maximum motor force [N]
+
+    CAPTURE_RAD: 0.65, // [m]
+    SCALE: 80 / 0.918, // pixels per meter
 };
 
 /** Compute rates of change for each state variable:
@@ -27,12 +36,11 @@ export const P = {
  * dw (heave acceleration) = (thrust - drag) / mass
  * dr (yaw acceleration) = (torque - drag) / inertia
 */
-
 export function derivatives(s, inp) {
     return {
-        dx: s.u * Math.cos(s.psi) * P.SCALE,
-        dy: s.u * Math.sin(s.psi) * P.SCALE,
-        dz: s.w * P.SCALE,
+        dx: s.u * Math.cos(s.psi),
+        dy: s.u * Math.sin(s.psi),
+        dz: s.w,
         dpsi: s.r, 
         du: (inp.Fx - P.Xu * s.u) / P.m_surge,
         dw: (inp.Fz - P.Zw * s.w) / P.m_heave,

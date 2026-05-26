@@ -40,27 +40,23 @@
         <h3> MOTORS </h3>
         
         <div class="motor-row"><div class="motor-label">M1 LEFT</div>
-          <div class="motor-bar">
-            <div class="motor-fill-hz" id="mb1"></div>
-          </div>
+          <div class="motor-bar"><div class="motor-fill" id="m1"></div></div>
         </div>
+
         <div class="motor-row"><div class="motor-label">M2 RIGHT</div>
-          <div class="motor-bar">
-            <div class="motor-fill-hz" id="mb2"></div>
-          </div>
+          <div class="motor-bar"><div class="motor-fill" id="m2"></div></div>
         </div>
 
         <div class="motor-row"><div class="motor-label">M3 VERT</div>
-          <div class="motor-bar">
-            <div class="motor-fill-vt" id="mb3"></div>
-          </div>
+          <div class="motor-bar"><div class="motor-fill" id="m3"></div></div>
         </div>
       </div>
       
       <div class="disp-block">
         <h3> TARGET </h3>
-          <div class="state-row"><span class="state-label">dX [m]</span> <span class="state-val" id="dx">+0.00</span></div>
-          <div class="state-row"><span class="state-label">dY [m]</span> <span class="state-val" id="dy">+0.00</span></div>
+          <!-- <div class="state-row"><span class="state-label">dX [m]</span> <span class="state-val" id="dx">+0.00</span></div>
+          <div class="state-row"><span class="state-label">dY [m]</span> <span class="state-val" id="dy">+0.00</span></div> -->
+          <div class="state-row"><span class="state-label">DIST [m]</span> <span class="state-val" id="dist">+0.00</span></div>
           <div class="state-row"><span class="state-label">dZ [m]</span> <span class="state-val" id="dz">+0.00</span></div>
           <div class="state-row"><span class="state-label">BEARING [°]</span> <span class="state-val" id="brg">+0.0</span></div>
       </div>
@@ -73,13 +69,13 @@
 
       <div class="disp-block">
         <h3> SYSTEM </h3>
-          <div class="state-row"><span id="time-elapsed">T+00:00</span></div>
+        <div id="time-elapsed">T+00:00</div>
       </div>
     </div>
   </div>
 
   <footer>
-    <span> AIRSHIP CONTROLLER SIM DEMO v8.28</span>
+    <span> AIRSHIP CONTROLLER SIM DEMO v8.29</span>
     <span> H. LING </span>
   </footer>
 
