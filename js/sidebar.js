@@ -17,11 +17,8 @@ export function updateSB(state, target, input, score, timerStarted, t) {
     document.getElementById('m3').style.width = Math.min(Math.abs(input.Fz) / P.F_max, 1) * 100 + '%';
 
     // TARGET
-    // document.getElementById('dx').textContent = U.format(U.dist(target, state).dx);
-    // document.getElementById('dy').textContent = U.format(U.dist(target, state).dy);
-    document.getElementById('dz').textContent = U.format(U.dist(target, state).dz);
-
     document.getElementById('dist').textContent = U.format(U.dist(target, state).dist2D);
+    document.getElementById('dz').textContent = U.format(U.dist(target, state).dz);
     document.getElementById('brg').textContent = U.format(U.dist(target, state).brg) + '°';
 
     // SCORE

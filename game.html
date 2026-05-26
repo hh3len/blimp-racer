@@ -1,18 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Airship Racer</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&display=swap"/>
   <link rel="stylesheet" href="style.css"/>
 </head>
 
 <body>
-  <header>
-    <h1>AMASS AIRSHIP // INTERACTIVE SIM</h1>
-  </header>
-
   <div id="main">
     <div id="canvas">
       <div class="canvas-panel" data-label="TOP VIEW  (X–Y)">
@@ -54,8 +50,6 @@
       
       <div class="disp-block">
         <h3> TARGET </h3>
-          <!-- <div class="state-row"><span class="state-label">dX [m]</span> <span class="state-val" id="dx">+0.00</span></div>
-          <div class="state-row"><span class="state-label">dY [m]</span> <span class="state-val" id="dy">+0.00</span></div> -->
           <div class="state-row"><span class="state-label">DIST [m]</span> <span class="state-val" id="dist">+0.00</span></div>
           <div class="state-row"><span class="state-label">dZ [m]</span> <span class="state-val" id="dz">+0.00</span></div>
           <div class="state-row"><span class="state-label">BEARING [°]</span> <span class="state-val" id="brg">+0.0</span></div>
@@ -75,9 +69,14 @@
   </div>
 
   <footer>
-    <span> AIRSHIP CONTROLLER SIM DEMO v11.38</span>
-    <span> H. LING </span>
+    <span>AIRSHIP CONTROL SIMULATOR // H. LING </span>
+    <span> v0.11.33</span>
   </footer>
+
+  <script type="module">
+    import { insertNav } from './js/nav.js';
+    insertNav('game');
+  </script>
 
   <script type="module" src="js/main.js"></script>
 </body>

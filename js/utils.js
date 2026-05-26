@@ -25,9 +25,6 @@ export const dist = (s, t) => ({
 // Radians to degrees unit conversion
 export const radToDeg = rad => rad * 180 / Math.PI;
 
-// Scale from meters (default) to pixels (canvas)
-export const toPixels = m => m * P.SCALE;
-
 // Color palette
 export const COLOR = {
     grn: '#2bff7e',

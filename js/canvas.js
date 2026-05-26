@@ -289,7 +289,6 @@ function drawDetailsSide(angle) {
     const noseRadY = vb * Math.sin(Math.PI/6); // Constant
     const noseLeftX = noseCenterX - noseRadX;
     const noseRightX = noseCenterX + noseRadX;
-    console.log(noseRadY);
     
     // // Draw hull ellipse spanning both shapes
     // const ellipseCenterX = noseLeftX * cos;

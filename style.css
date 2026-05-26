@@ -1,12 +1,14 @@
 /* Define commonly used colors & fonts */
 :root {
   --bg: #050e06;
-  --txt: #2bff7e;
+  --G: #2bff7e;
   --motor: #15c05a;
   --panel: #070d08; 
+
   --lightG: #97ffc6;
   --midG: #249658;
   --darkG: #1a7040;
+
   --font: 'Share Tech Mono', monospace;
   --title: 'Orbitron', sans-serif;
 }
@@ -14,7 +16,137 @@
 /* Applies to all elements */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* Default display */
+/* LOADING SCREEN */
+#home {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 32px;
+    padding: 40px 18px;
+    text-align: center;
+}
+
+.home-subtitle {
+    font-size: 0.9rem;
+    letter-spacing: 0.3em;
+    color: var(--darkG);
+    padding: 4px 10px;
+    border-radius: 2px;
+}
+
+.home-title {
+    font-family: var(--title);
+    font-size: clamp(2rem, 6vw, 4rem);
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    color: var(--G);
+    text-shadow: 0 0 40px #2bff7e44, 0 0 80px #2bff7e22;
+    line-height: 1.1;
+}
+
+.home-tagline {
+    font-size: clamp(0.75rem, 2vw, 0.95rem);
+    color: var(--midG);
+    max-width: 480px;
+    line-height: 1.8;
+}
+
+.home-start {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.btn {
+    font-family: var(--title);
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    padding: 12px 32px;
+    border-radius: 4px;
+    border: 1px solid var(--G);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-play {
+    color: var(--G);
+    border: 1px solid var(--G);
+    background: transparent;
+    box-shadow: 0 0 20px #2bff7e44;
+}
+
+.btn-play:hover {
+    background: var(--G);
+    color: var(--bg);
+    transform: scale(1.05);
+    box-shadow: 0 0 20px #2bff7e90;
+}
+
+#home { position: relative; z-index: 1; }
+
+/* NAV BARRR */
+#nav {
+    width: 100%;
+    max-width: 1140px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--darkG);
+}
+
+.nav-logo {
+    font-family: var(--title);
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    border: 30px;
+    color: var(--G);
+    text-shadow: 0 0 12px #2bff7e66;
+    text-decoration: none;
+}
+
+.nav-links {
+    display: flex;
+    gap: 24px;
+}
+
+.nav-links a {
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    color: var(--midG);
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+.nav-links a:hover {
+    color: var(--G);
+    text-shadow: 0 0 8px #2bff7e66;
+}
+
+.nav-links a.active {
+    color: var(--G);
+    border-bottom: 1px solid var(--G);
+    padding-bottom: 2px;
+}
+
+/* Mobile nav */
+@media (max-width: 768px) {
+    #nav {
+      flex-direction: column;
+      gap: 10px;
+      padding: 10px;
+    }
+
+    .nav-links {
+        gap: 14px;
+    }
+}
+
+/* GAME DISPLAY */
 body {
     display: flex;
     flex-direction: column;
@@ -26,33 +158,23 @@ body {
     gap: 10px;
 
     background: var(--bg);
-    color: var(--txt);
+    color: var(--G);
     font-family: var(--font);
 }
-
-    header {
-        width: 100%;
-        max-width: 1140px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 10px 18px 6px;
-        border-bottom: 1px solid var(--darkG);
-    }
 
     h1 {
         font-family: var(--title);
         font-size: 1.05rem;
         font-weight: 900;
         letter-spacing: 0.18em;
-        color: var(--txt);
+        color: var(--G);
         text-shadow: 0 0 12px #2bff7e66;
     }
 
     h3 {
         font-family: var(--title);
         letter-spacing: 0.18em;
-        color: var(--txt);
+        color: var(--G);
         text-shadow: 0 0 12px #2bff7e66;
     }
 
@@ -117,7 +239,7 @@ body {
         gap: 10px;
 
         font-size: 0.67rem;
-        color: var(--txt);
+        color: var(--G);
     }
 
     .disp-block {

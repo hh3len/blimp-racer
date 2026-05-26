@@ -1,7 +1,7 @@
 import {P, derivatives, rk4} from './physics.js';
 import * as U from './utils.js';
 import * as CV from './canvas.js';
-import * as SB from '../sidebar.js';
+import * as SB from './sidebar.js';
 
 // Initialize scoreboard, state, and target
 let timerStarted = false;

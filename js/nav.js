@@ -1,0 +1,15 @@
+export function insertNav(activePage) {
+    const nav = document.createElement('nav');
+    nav.id = 'nav';
+    nav.innerHTML = `
+        <a href="index.html" class="nav-logo">// AMASS AIRSHIP // </a>
+        <div class="nav-links">
+            <a href="levels.html" class="${activePage === 'levels' ? 'active' : ''}">LEVELS</a>
+            <a href="game.html" class="${activePage === 'game' ? 'active' : ''}">PLAY</a>
+            <a href="leaderboard.html" class="${activePage === 'leaderboard' ? 'active' : ''}">LEADERBOARD</a>
+            <a href="about.html" class="${activePage === 'about' ? 'active' : ''}">ABOUT</a>
+            <a href="settings.html" class="${activePage === 'settings' ? 'active' : ''}">SETTINGS</a>
+        </div>
+    `;
+    document.body.prepend(nav);
+}
