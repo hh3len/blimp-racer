@@ -43,7 +43,7 @@ export function draw(state, target) {
 
     // CLEAR CANVAS
     let clearCanvas = (ctx) => {
-        ctx.fillStyle = 'black';
+        ctx.fillStyle = COLOR.bg;
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     };
 
@@ -63,7 +63,7 @@ export function draw(state, target) {
     // drawBody(ctxSide, sx, canvasZ, state.psi);
 
     drawBody(ctxTop, canvasTop.width / 2, canvasTop.height / 2, state.psi);
-    drawBody(ctxSide, canvasTop.width / 2, canvasTop.height / 2, state.psi);
+    drawBody(ctxSide, canvasSide.width / 2, canvasSide.height / 2, state.psi);
 }
 
 // Works as intended
@@ -267,8 +267,8 @@ function drawDetailsSide(angle) {
         ctxSide.moveTo(p[0].px, p[0].py);
         p.shift();
 
-        for (let i in p) {
-            ctxSide.lineTo(p[i].px, p[i].py);
+        for (const pt of p) {
+            ctxSide.lineTo(pt.px, pt.py);
         }
 
         ctxSide.closePath();
@@ -289,14 +289,7 @@ function drawDetailsSide(angle) {
     const noseRadY = vb * Math.sin(Math.PI/6); // Constant
     const noseLeftX = noseCenterX - noseRadX;
     const noseRightX = noseCenterX + noseRadX;
-    
-    // // Draw hull ellipse spanning both shapes
-    // const ellipseCenterX = noseLeftX * cos;
-    // const circleLeftEdge = noseCenterX - noseRadX;
-    // const circleRightEdge = noseCenterX + noseRadX;
-    // const ellipseLeftEdge  = ellipseCenterX - noseRadY * Math.abs(sin);
-    // const ellipseRightEdge  = ellipseCenterX + noseRadY * Math.abs(sin);
-    
+
     // Clip to blimp!
     (() => {
         ctxSide.save();

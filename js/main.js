@@ -28,67 +28,6 @@ function newTarget() {
 }
 let T = newTarget();
 
-// Game states
-const LEVEL = {
-    TUTORIAL: 'tutorial',
-    EASY: 'easy',
-    HARD: 'hard',
-    CHALLENGE: 'challenge',
-    RESULTS: 'results',
-};
-
-let gameLevel = LEVEL.TUTORIAL;
-let tutorialStep = 0;
-
-
-// Tutorial script
-const TUTORIAL_STEPS = [
-    {
-        text: ['WELCOME TO THE AMASS AIRSHIP SIMULATOR',
-               'Think you have what it takes to be a pilot?',
-               '',
-               'Press SPACE to continue'],
-        action: 'space', // Advance
-        lock: true, // Pause controls
-    },
-    {
-        text: ['YAW + SURGE',
-               'Press LEFT / RIGHT to rotate',
-               'and thrust forward.',
-               '',
-               'Hit the target to continue'],
-        action: 'capture', // Advance
-        lock: false,
-        targetPos: { x: 2, y: 0, z: 1.0 },  // fixed position in metres
-    },
-    {
-        text: ['ALTITUDE',
-               'Press UP to rise, DOWN to sink.',
-               '',
-               'Hit the target to continue'],
-        action: 'capture',
-        lock: false,
-        targetPos: { x: 0, y: 0, z: 2.5 },  // high target forces altitude change
-    },
-    {
-        text: ['COMBINED CONTROLS',
-               'Use all controls together.',
-               'Hit the target to continue'],
-        action: 'capture',
-        lock: false,
-        targetPos: null,       // random
-    },
-    {
-        text: ['YOU\'RE READY TO FLY',
-               'Complete each level as fast as possible.',
-               'Stay close to the path for a score multiplier.',
-               '',
-               'Press SPACE to begin'],
-        action: 'space',
-        lock: true,
-    },
-];
-
 // User-controlled inputs
 const keys = {
     up: false,
@@ -115,6 +54,13 @@ document.addEventListener('keyup', function(e) {
     if (e.key === 'ArrowDown') keys.down = false;
     if (e.key === 'ArrowLeft') keys.left = false;
     if (e.key === 'ArrowRight') keys.right = false;
+});
+
+window.addEventListener('blur', () => {
+    keys.up = false;
+    keys.down = false;
+    keys.left = false;
+    keys.right = false;
 });
 
 function mainLoop(timestamp) {
@@ -145,8 +91,7 @@ function mainLoop(timestamp) {
         S.w = Math.max(0.2, S.w); // Possibly implement CBF here
     }
 
-    // Check if ship is within capture radius
-    if (U.dist(S, T).dist < P.CAPTURE_RAD) {
+    if (U.dist(S, T).dist3D < P.CAPTURE_RAD) {
         score++;
         T = newTarget();
     }

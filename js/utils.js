@@ -3,15 +3,6 @@ export function format(n, d = 2) {
     return (n >= 0 ? '+' : '') + n.toFixed(d);
 }
 
-// // Calculate distance between 2 points
-// export const distBtwn = (p1, p2) => {
-//     let sum = 0;
-//     for (let i in p1) { 
-//         sum += (p1[i] - p2[i]) ** 2; 
-//     }
-//     return Math.sqrt(sum);
-// }
-
 // Calculate distance between state & target objects
 export const dist = (s, t) => ({
     dx: t.x - s.x,
@@ -19,7 +10,7 @@ export const dist = (s, t) => ({
     dz: t.z - s.z,
     brg: radToDeg(Math.atan2(t.y - s.y, t.x - s.x)),
     dist2D: Math.sqrt((t.x - s.x) ** 2 + (t.y - s.y) ** 2),
-    dist: Math.sqrt((t.x - s.x) ** 2 + (t.y - s.y) ** 2 + (t.z - s.z) ** 2)
+    dist3D: Math.sqrt((t.x - s.x) ** 2 + (t.y - s.y) ** 2 + (t.z - s.z) ** 2)
 })
 
 // Radians to degrees unit conversion
