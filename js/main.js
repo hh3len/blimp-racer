@@ -8,33 +8,19 @@ let timerStarted = false;
 let startTime = null;
 let score = 0;
 
-let S = {
-    x: 0.0, // global x position [m]
-    y: 0.0, // global y position [m]
-    z: 1.0, // global z posiion [m]
-    psi: 0.0, // heading [rad]
-    u: 0.0, // surge velocity [m/s]
-    w: 0.0, // heave velocity [m/s]
-    r: 0.0, // yaw velocity [rad/s]
-};
+// State store global x/y/z position [m], heading [rad], surge/heave/yaw velocity [m/s]
+let S = { x: 0.0, y: 0.0, z: 1.0, psi: 0.0, u: 0.0, w: 0.0, r: 0.0};
 
 // Generate & define random target
-function newTarget() {
-    return {
-        x: (Math.random() - 0.5) * 6,
-        y: (Math.random() - 0.5) * 6,
-        z: Math.random() * 3 + 0.5 // Minimum z height
-    };
-}
+let newTarget = () => ({
+    x: (Math.random() - 0.5) * 6,
+    y: (Math.random() - 0.5) * 6,
+    z: Math.random() * 3 + 0.5 // Minimum z height
+});
 let T = newTarget();
 
-// User-controlled inputs
-const keys = {
-    up: false,
-    down: false,
-    left: false,
-    right: false,
-};
+// User controls
+const keys = { up: false, down: false, left: false, right: false };
 
 document.addEventListener('keydown', function(e) {
     if (e.key === 'ArrowUp') keys.up = true;
@@ -64,25 +50,21 @@ window.addEventListener('blur', () => {
 });
 
 function mainLoop(timestamp) {
+    /** Calculate motor thrust force from keyboard inputs
+     * M1 = left, M2 = right, M3 = up/down
+     */
     const F1 = keys.left ? P.F_step : 0;
     const F2 = keys.right ? P.F_step : 0;
-    
-    // Up = positive Fz = positive dw = w increases = z increases = blimp rises & vice versa for down
-    const Fz = (keys.up ? P.F_step_v : 0) - (keys.down ? P.F_step_v : 0);
+    const Fz = (keys.up ? P.F_step_v : 0) - (keys.down ? P.F_step_v : 0); 
 
-    /** Inputs to be derived:
+    // Motor thrust values (only used for visual display)
+    const thrust = { F1, F2, Fz };
+
+    /** Inputs used to compute derived state:
      * Fx (surge thrust)
      * Mz (differential torque)
-     * Fz (heave thrust)
-     */
-    const I = {
-        Fx: F1 + F2,
-        Mz: (F1 - F2) * P.ly,
-        Fz
-    };
-
-    // Individual motor thrust
-    const thrust = { F1, F2, Fz };
+     * Fz (heave thrust) */
+    const I = { Fx: F1 + F2, Mz: (F1 - F2) * P.ly, Fz };
 
     // Compute & update state
     S = rk4(S, I);
@@ -96,13 +78,16 @@ function mainLoop(timestamp) {
         S.w = Math.max(0.2, S.w); // Possibly implement CBF here
     }
 
+    // Capture check
     if (U.dist(S, T).dist3D < P.CAPTURE_RAD) {
         score++;
         T = newTarget();
     }
 
+    // Draw canvas & sidebar
     CV.draw(S, T);
     SB.updateSB(S, T, thrust, score, timerStarted, startTime);
+
     requestAnimationFrame(mainLoop);
 }
 

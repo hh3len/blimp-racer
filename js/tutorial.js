@@ -1,3 +1,5 @@
+const TUTORIAL_KEY = 'tutorialComplete';
+
 // Tutorial script
 export const TUTORIAL_STEPS = [
     {
@@ -13,3 +15,5 @@ export const TUTORIAL_STEPS = [
 export function resetTutorial() {
     tutorialStep = 0;
 }
+
+localStorage.setItem('tutorialComplete', 'true');
