@@ -87,7 +87,7 @@ function mainLoop(timestamp) {
     G.frame++;
 
     CV.draw(S, T, G);
-    SB.updateSB(S, T, I, G);
+    SB.updateSB(S, T, G, I);
     requestAnimationFrame(mainLoop);
 }
 

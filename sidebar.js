@@ -1,7 +1,7 @@
 import {P} from './physics.js';
 import * as U from './utils.js';
 
-export function updateSB(state, target, input, game) {
+export function updateSB(state, target, game, input) {
     // VEHICLE
     document.getElementById('x').textContent = U.format(state.x);
     document.getElementById('y').textContent = U.format(state.y);

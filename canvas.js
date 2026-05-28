@@ -22,7 +22,7 @@ resizeCanvases();
 const va = P.a * P.SCALE;
 const vb = P.b * P.SCALE;
 
-export function draw(state, target) {
+export function draw(state, target, game) {
     // Convert m -> px
     const sx = state.x * P.SCALE;
     const sy = state.y * P.SCALE;
@@ -42,10 +42,7 @@ export function draw(state, target) {
     const camZ = canvasZ - canvasSide.height / 2;
 
     // CLEAR CANVAS
-    let clearCanvas = (ctx) => {
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    };
+    let clearCanvas = ctx => { ctx.fillStyle = 'black'; ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height); };
 
     clearCanvas(ctxTop);
     clearCanvas(ctxSide);
@@ -55,8 +52,8 @@ export function draw(state, target) {
     drawGrid(ctxSide, camX, camZ);
 
     // TRAIL
-    drawTrail(ctxTop);
-    drawTrail(ctxSide);
+    drawTrail(ctxTop, game.trailX, game.trailY);
+    drawTrail(ctxSide, game.trailX, game.trailY);
 
     // TARGET
     drawTarg(ctxTop, tx - camX, ty - camY);
@@ -68,7 +65,15 @@ export function draw(state, target) {
 }
 
 // TODO: implement
-function drawTrail() {}
+function drawTrail(ctx, trailX, trailY) {
+    if (trailX.length < 5) return;
+
+    // Convert m -> px
+    const x = trailX.map(i => i * P.SCALE);
+    const y = trailY.map(i => i * P.SCALE);
+
+    // console.log(x[trailX.length - 1], y[trailY.length - 1]);
+}
 
 // Works as intended
 function drawGrid(ctx, camX, camY, spacing = va) {
@@ -139,12 +144,12 @@ function drawTarg(ctx, px, py) {
     ctx.strokeStyle = COLOR.orange;
     ctx.lineWidth = 1.5;
     ctx.setLineDash([5, 5]);
-    ctx.arc(px, py, 30, 0, Math.PI * 2);
+    ctx.arc(px, py, 40, 0, Math.PI * 2);
     ctx.stroke();
     ctx.setLineDash([]);
 
     // DIAMOND
-    const ds = 8;
+    const ds = 10;
     ctx.beginPath();
     ctx.moveTo(px, py - ds);
     ctx.lineTo(px + ds, py);
