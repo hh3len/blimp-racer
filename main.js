@@ -5,9 +5,10 @@ import * as SB from './sidebar.js';
 
 // Stores global x/y/z position [m], heading [rad], surge/heave/yaw velocity [m/s]
 const newState = ()=> ({ x: 0.0, y: 0.0, z: 1.0, psi: 0.0, u: 0.0, w: 0.0, r: 0.0 });
-const newGame = ()=> ({ timerStarted: false, startTime: null, score: 0 }); // Timer, score, and display variables
+const newGame = ()=> ({ timerStarted: false, startTime: null, score: 0, trailX: [], trailY: [], trailZ: [], frame: 0 }); // Timer, score, and display variables
 const newTarget = ()=> ({ x: (Math.random() - 0.5) * 6, y: (Math.random() - 0.5) * 6, z: Math.random() * 3 + 0.5 }); // Target position
 
+// Initialize variables
 let S = newState();
 let G = newGame();
 let T = newTarget();
@@ -68,13 +69,24 @@ function mainLoop(timestamp) {
     // Clamp z to be entirely above ground
     if (S.z < P.b) { S.z = P.b; S.w = Math.max(0.2, S.w); }
 
+    // Trail
+    if (G.frame % 3 === 0) {
+        G.trailX.push(S.x); G.trailY.push(S.y); G.trailZ.push(S.z);
+        if (G.trailX.length > 300) {
+            G.trailX.shift(); G.trailY.shift(); G.trailZ.shift();
+        }
+    }
+
     // Check if ship is within capture radius
     if (U.dist(S, T).dist < P.CAPTURE_RAD) {
         G.score++;
         T = newTarget();
     }
 
-    CV.draw(S, T);
+    // Update frame count
+    G.frame++;
+
+    CV.draw(S, T, G);
     SB.updateSB(S, T, I, G);
     requestAnimationFrame(mainLoop);
 }

@@ -54,17 +54,21 @@ export function draw(state, target) {
     drawGrid(ctxTop, camX, camY);
     drawGrid(ctxSide, camX, camZ);
 
+    // TRAIL
+    drawTrail(ctxTop);
+    drawTrail(ctxSide);
+
     // TARGET
     drawTarg(ctxTop, tx - camX, ty - camY);
     drawTarg(ctxSide, tx - camX, targetCanvasZ - camZ);
     
     // BLIMP
-    // drawBody(ctxTop, sx, sy, state.psi);
-    // drawBody(ctxSide, sx, canvasZ, state.psi);
-
     drawBody(ctxTop, canvasTop.width / 2, canvasTop.height / 2, state.psi);
     drawBody(ctxSide, canvasTop.width / 2, canvasTop.height / 2, state.psi);
 }
+
+// TODO: implement
+function drawTrail() {}
 
 // Works as intended
 function drawGrid(ctx, camX, camY, spacing = va) {
@@ -289,15 +293,7 @@ function drawDetailsSide(angle) {
     const noseRadY = vb * Math.sin(Math.PI/6); // Constant
     const noseLeftX = noseCenterX - noseRadX;
     const noseRightX = noseCenterX + noseRadX;
-    console.log(noseRadY);
-    
-    // // Draw hull ellipse spanning both shapes
-    // const ellipseCenterX = noseLeftX * cos;
-    // const circleLeftEdge = noseCenterX - noseRadX;
-    // const circleRightEdge = noseCenterX + noseRadX;
-    // const ellipseLeftEdge  = ellipseCenterX - noseRadY * Math.abs(sin);
-    // const ellipseRightEdge  = ellipseCenterX + noseRadY * Math.abs(sin);
-    
+        
     // Clip to blimp!
     (() => {
         ctxSide.save();
