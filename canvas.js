@@ -52,33 +52,48 @@ export function draw(state, target, game) {
     drawGrid(ctxSide, camX, camZ);
 
     // TRAIL
-    drawTrail(ctxTop, game.trailX, game.trailY);
-    drawTrail(ctxSide, game.trailX, game.trailY);
+    drawTrail(ctxTop, game.trailX, game.trailY, camX, camY);
+    // drawTrail(ctxSide, game.trailX, game.trailZ, camX, camZ);
 
     // TARGET
     drawTarg(ctxTop, tx - camX, ty - camY);
     drawTarg(ctxSide, tx - camX, targetCanvasZ - camZ);
     
     // BLIMP
-    drawBody(ctxTop, canvasTop.width / 2, canvasTop.height / 2, state.psi);
-    drawBody(ctxSide, canvasTop.width / 2, canvasTop.height / 2, state.psi);
+    drawBody(ctxTop, state.psi);
+    drawBody(ctxSide, state.psi);
 }
 
-// TODO: implement
-function drawTrail(ctx, trailX, trailY) {
+// Working!
+function drawTrail(ctx, trailX, trailY, camX, camY) {
     if (trailX.length < 5) return;
 
     // Convert m -> px
     const x = trailX.map(i => i * P.SCALE);
     const y = trailY.map(i => i * P.SCALE);
 
-    // console.log(x[trailX.length - 1], y[trailY.length - 1]);
+    // console.log(x[x.length - 1], y[y.length - 1], x.length);
+
+    ctx.strokeStyle = COLOR.grn;
+    ctx.beginPath();
+
+    // Add camera translation
+    for (let i = 0; i < x.length; i++) {
+        const p = {
+            px: x[i] - camX, 
+            py: y[i] - camY,
+        };
+
+        // Start from origin point and draw line to every updated state
+        i === 0 ? ctx.moveTo(p.px,p.py) : ctx.lineTo(p.px,p.py);
+        console.log(p);
+    }
+    
+    ctx.stroke();
 }
 
-// Works as intended
 function drawGrid(ctx, camX, camY, spacing = va) {
-
-    // Draw origin crosshairs for top view
+    // Draw origin crosshairs in top view
     if (ctx == ctxTop) {
         // const ox = ctx.canvas.width / 2 - camX - ctx.canvas.width / 2;
         // const oy = ctx.canvas.height / 2 - camY - ctx.canvas.height / 2;
@@ -137,7 +152,7 @@ function drawGrid(ctx, camX, camY, spacing = va) {
     }
 };
 
-// Works as intended
+// Draw target circles
 function drawTarg(ctx, px, py) {
     // CIRCLE
     ctx.beginPath();
@@ -167,10 +182,10 @@ function drawTarg(ctx, px, py) {
 // drawDetails
 // restore
 
-// Works as intended
-function drawBody(ctx, x, y, psi) {
+// Draw body of blimp
+function drawBody(ctx, psi) {
     ctx.save();
-    ctx.translate(x, y);
+    ctx.translate(ctx.canvas.width / 2, ctx.canvas.height / 2);
     ctx == ctxTop && ctx.rotate(psi);
 
     let length = va;
