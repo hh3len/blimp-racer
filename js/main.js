@@ -70,14 +70,19 @@ function mainLoop(timestamp) {
     // Up = positive Fz = positive dw = w increases = z increases = blimp rises & vice versa for down
     const Fz = (keys.up ? P.F_step_v : 0) - (keys.down ? P.F_step_v : 0);
 
-    /* Fx (surge thrust)
+    /** Inputs to be derived:
+     * Fx (surge thrust)
      * Mz (differential torque)
-     * Fz (heave thrust) */
+     * Fz (heave thrust)
+     */
     const I = {
-        F1, F2, Fx: F1 + F2,
+        Fx: F1 + F2,
         Mz: (F1 - F2) * P.ly,
         Fz
     };
+
+    // Individual motor thrust
+    const thrust = { F1, F2, Fz };
 
     // Compute & update state
     S = rk4(S, I);
@@ -97,7 +102,7 @@ function mainLoop(timestamp) {
     }
 
     CV.draw(S, T);
-    SB.updateSB(S, T, I, score, timerStarted, startTime);
+    SB.updateSB(S, T, thrust, score, timerStarted, startTime);
     requestAnimationFrame(mainLoop);
 }
 
