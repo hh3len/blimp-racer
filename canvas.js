@@ -40,14 +40,11 @@ export function draw(state, target, game) {
     // Flip axes; canvas +y = down
     const canvasY = canvasTop.height - sy;
     const targetCanvasY = canvasTop.height - ty;
-
     const canvasZ = canvasSide.height - sz;
     const targetCanvasZ = canvasSide.height - tz;
 
     // Camera offsets: vehicle-relative view
-
-    // Canvas shifts by the blimp's position
-    // camX = "how far the world has scrolled in x"
+    // Canvas shifts by the blimp's position, camX = "how far world scrolled in x"
     // To draw the world pixel position px, subtract camX from it
 
     const camX = sx - canvasTop.width / 2;
@@ -55,12 +52,15 @@ export function draw(state, target, game) {
     const camZ = canvasZ - canvasSide.height / 2;
 
     // CLEAR CANVAS
-    let clearCanvas = ctx => { ctx.fillStyle = 'black'; ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height); };
+    let clearCanvas = ctx => { ctx.fillStyle = COLOR.bg; ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height); };
     clearCanvas(ctxTop); clearCanvas(ctxSide);
 
     // GRID
-    drawGrid(ctxTop, camX, camY);
-    drawGrid(ctxSide, camX, camZ);
+    // drawGrid(ctxTop, camX, camY);
+    // drawGrid(ctxSide, camX, camZ);
+
+    drawOrigin(ctxTop, sx, sy);
+    drawOrigin(ctxSide, sx, sz);
 
     // TRAIL
     // drawTrail(ctxTop, game.trailX, game.trailY, camX, camY, game);
@@ -77,7 +77,20 @@ export function draw(state, target, game) {
     drawBody(ctxSide, state.psi);
 }
 
-// Working!
+
+// Working as intended
+function drawOrigin(ctx, sx, sy) {
+    const w = ctx.canvas.width;
+    const h = ctx.canvas.height;
+    console.log(w, h)
+
+    ctx.strokeStyle = 'red';
+    ctx.beginPath();
+    ctx.arc(w/2 - sx, h/2 + sy, 25, 0, 2 * Math.PI);
+    ctx.stroke();
+}
+
+// // Working!
 // function drawTrail(ctx, trailX, trailY, offsetx, offsety, g) {
 //     const w = ctx.canvas.width;
 //     const h = ctx.canvas.height;
@@ -126,7 +139,7 @@ function drawTrail(ctx, trailX, trailY, camA, camB) {
 
 function drawGrid(ctx, camX, camY, spacing = va) {
     // Draw origin crosshairs in top view
-    if (ctx == ctxTop) {
+    // if (ctx == ctxTop) {
         const ox = -camX;
         const oy = camY;
 
@@ -141,7 +154,7 @@ function drawGrid(ctx, camX, camY, spacing = va) {
         ctx.stroke();
 
         ctx.restore();
-    }
+    // }
 
     ctx.strokeStyle = COLOR.grid;
     ctx.lineWidth = 0.8;
