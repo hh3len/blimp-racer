@@ -168,18 +168,21 @@ function drawGrid(ctx, sx, sy, camX, camY, spacing = va) {
     }
     ctx.restore();
 
-    // Draw ground
+    // Draw ground //camY = canvasY - h / 2; //canvasY = h - sy;
+    // camY = h - sy - h/2 = h/2 - sy
+    // h - camY = h - h/2 + sy = h/2 + sy
+
     if (ctx == ctxSide) {
         ctx.save();
        
         ctx.beginPath();
-        ctx.moveTo(0, ctx.canvas.height - camY); ctx.lineTo(ctx.canvas.width, ctx.canvas.height - camY);
+        ctx.moveTo(0, h/2 + sy); ctx.lineTo(w, h - camY);
         ctx.stroke();
 
-        ctx.fillRect(0, ctx.canvas.height - camY, ctx.canvas.width, ctx.canvas.height);
+        ctx.fillRect(0, h - camY, w, h);
 
         ctx.textAlign = 'left'; ctx.font = '0.8rem Share Tech Mono'; ctx.fillStyle = COLOR.grnDim;
-        ctx.fillText('GROUND', 5, ctx.canvas.height - camY + 15); 
+        ctx.fillText('GROUND', 5, h - camY + 15); 
         
         ctx.restore();
     }
