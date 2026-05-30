@@ -43,6 +43,12 @@ export function draw(state, target, game) {
     const canvasZ = canvasSide.height - sz;
     const targetCanvasZ = canvasSide.height - tz;
 
+    // Default canvas styles
+    ctxTop.lineWidth = 1.5; ctxTop.strokeStyle = COLOR.grn;
+    ctxTop.fillStyle = COLOR.body;
+    ctxSide.lineWidth = 1.5; ctxSide.strokeStyle = COLOR.grn;
+    ctxSide.fillStyle = COLOR.body;
+
     // Camera offsets: vehicle-relative view
     // Canvas shifts by the blimp's position, camX = "how far world scrolled in x"
     // To draw the world pixel position px, subtract camX from it
@@ -62,8 +68,8 @@ export function draw(state, target, game) {
     // TRAIL
     // drawTrail(ctxTop, game.trailX, game.trailY, camX, camY, game);
     // drawTrail(ctxSide, game.trailX, game.trailZ, camX, camZ, game);
-    drawTrail(ctxTop, game.trailX, game.trailY, camX, camY);
-    drawTrail(ctxSide, game.trailX, game.trailZ, camX, camZ);
+    // drawTrail(ctxTop, game.trailX, game.trailY, camX, camY);
+    // drawTrail(ctxSide, game.trailX, game.trailZ, camX, camZ);
 
     // TARGET
     drawTarg(ctxTop, tx - camX, targetCanvasY - camY);
@@ -122,11 +128,11 @@ function drawTrail(ctx, trailX, trailY, camA, camB) {
 }
 
 function drawGrid(ctx, sx, sy, camX, camY, spacing = va) {
+    const w = ctx.canvas.width;
+    const h = ctx.canvas.height;
+
     // Draw origin crosshairs
     (() => {
-        const w = ctx.canvas.width;
-        const h = ctx.canvas.height;
-
         ctx.save();
         ctx.lineWidth = 4;
         ctx.beginPath();
@@ -139,15 +145,14 @@ function drawGrid(ctx, sx, sy, camX, camY, spacing = va) {
     }) ();
 
     ctx.save();
-    ctx.strokeStyle = COLOR.grid;
-    ctx.lineWidth = 0.8;
+    ctx.lineWidth = 1; ctx.strokeStyle = COLOR.grid;
 
     // Extend grid values infinitely
-    const wrappedX = ((-camX) % spacing + spacing) % spacing;
-    const wrappedY = ((-camY) % spacing + spacing) % spacing;
+    const wrappedX = ((-sx) % spacing + spacing) % spacing;
+    const wrappedY = ((sy) % spacing + spacing) % spacing;
 
     // Vertical lines
-    for (let x = wrappedX; x < ctx.canvas.width; x += spacing) {
+    for (let x = wrappedX; x < w; x += spacing) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, ctx.canvas.height);
@@ -155,7 +160,7 @@ function drawGrid(ctx, sx, sy, camX, camY, spacing = va) {
     }
 
     // Horiz lines
-    for (let y = wrappedY; y < ctx.canvas.height; y += spacing) {
+    for (let y = wrappedY; y < h; y += spacing) {
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(ctx.canvas.width, y);
@@ -186,7 +191,6 @@ function drawTarg(ctx, px, py) {
     // CIRCLE
     ctx.beginPath();
     ctx.strokeStyle = COLOR.orange;
-    ctx.lineWidth = 1.5;
     ctx.setLineDash([5, 5]);
     ctx.arc(px, py, va / 2, 0, Math.PI * 2);
     ctx.stroke();
@@ -226,7 +230,6 @@ function drawBody(ctx, psi) {
     ctx.ellipse(0, 0, length, vb, 0, 0, Math.PI * 2);
     ctx.fillStyle = COLOR.body;
     ctx.fill();
-    ctx.lineWidth = 2;
     ctx.stroke();
 
     ctx == ctxTop && drawDetailsTop();
@@ -262,7 +265,6 @@ function drawDetailsTop() {
     // L/R fins
     ctxTop.fillStyle = COLOR.fin;
     ctxTop.lineCap = "round";
-    ctxTop.lineWidth = 1;
 
     ctxTop.beginPath();
     ctxTop.moveTo(-22, -vb);
