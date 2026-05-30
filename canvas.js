@@ -18,6 +18,11 @@ function resizeCanvases() {
 window.addEventListener('resize', resizeCanvases);
 resizeCanvases();
 
+// World-to-canvas coordinate convention:
+// canvas_x =  world_x * SCALE 
+// canvas_y = -world_y * SCALE (Flip y)
+// canvas_z = -world_z * SCALE (Flip z)
+
 // Convert m -> px
 const va = P.a * P.SCALE;
 const vb = P.b * P.SCALE;
@@ -32,31 +37,39 @@ export function draw(state, target, game) {
     const ty = target.y * P.SCALE;
     const tz = target.z * P.SCALE;
 
-    // Flip z-axis
+    // Flip axes; canvas +y = down
+    const canvasY = canvasTop.height - sy;
+    const targetCanvasY = canvasTop.height - ty;
+
     const canvasZ = canvasSide.height - sz;
     const targetCanvasZ = canvasSide.height - tz;
 
-    // Camera offsets
+    // Camera offsets: vehicle-relative view
+
+    // Canvas shifts by the blimp's position
+    // camX = "how far the world has scrolled in x"
+    // To draw the world pixel position px, subtract camX from it
+
     const camX = sx - canvasTop.width / 2;
-    const camY = sy - canvasTop.height / 2;
+    const camY = canvasY - canvasTop.height / 2;
     const camZ = canvasZ - canvasSide.height / 2;
 
     // CLEAR CANVAS
     let clearCanvas = ctx => { ctx.fillStyle = 'black'; ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height); };
-
-    clearCanvas(ctxTop);
-    clearCanvas(ctxSide);
+    clearCanvas(ctxTop); clearCanvas(ctxSide);
 
     // GRID
     drawGrid(ctxTop, camX, camY);
     drawGrid(ctxSide, camX, camZ);
 
     // TRAIL
+    // drawTrail(ctxTop, game.trailX, game.trailY, camX, camY, game);
+    // drawTrail(ctxSide, game.trailX, game.trailZ, camX, camZ, game);
     drawTrail(ctxTop, game.trailX, game.trailY, camX, camY);
-    // drawTrail(ctxSide, game.trailX, game.trailZ, camX, camZ);
+    drawTrail(ctxSide, game.trailX, game.trailZ, camX, camZ);
 
     // TARGET
-    drawTarg(ctxTop, tx - camX, ty - camY);
+    drawTarg(ctxTop, tx - camX, targetCanvasY - camY);
     drawTarg(ctxSide, tx - camX, targetCanvasZ - camZ);
     
     // BLIMP
@@ -65,28 +78,47 @@ export function draw(state, target, game) {
 }
 
 // Working!
-function drawTrail(ctx, trailX, trailY, camX, camY) {
-    if (trailX.length < 5) return;
+// function drawTrail(ctx, trailX, trailY, offsetx, offsety, g) {
+//     const w = ctx.canvas.width;
+//     const h = ctx.canvas.height;
+
+//     if (trailX.length < 5) return;
+
+//     // Convert m -> px
+//     const x = trailX.map(i => i * P.SCALE);
+//     const y = trailY.map(i => -i * P.SCALE);
+
+//     ctx.strokeStyle = COLOR.grn + '80'; // Add opacity
+//     ctx.beginPath();
+
+//     // Add camera translation
+//     for (let i = 0; i < x.length; i++) {
+//         const p = { px: x[i] - offsetx, py: y[i] + offsety };
+//         i === 0 ? ctx.moveTo(p.px,p.py) : ctx.lineTo(p.px,p.py);
+//     }
+    
+//     ctx.stroke();
+// }
+
+function drawTrail(ctx, trailX, trailY, camA, camB) {
+    // const camY = sy - canvasSide.height / 2;
+    // const camZ = canvasZ - canvasSide.height / 2;
+
+    const w = ctx.canvas.width / 2;
+    let h = ctx.canvas.height / 2; // except for z it'll be +1m 
+    ctx === ctxTop ? h = h: h = ctx.canvas.height / 2 + P.SCALE; // except for z it'll be +1m 
 
     // Convert m -> px
     const x = trailX.map(i => i * P.SCALE);
     const y = trailY.map(i => i * P.SCALE);
-
-    // console.log(x[x.length - 1], y[y.length - 1], x.length);
 
     ctx.strokeStyle = COLOR.grn;
     ctx.beginPath();
 
     // Add camera translation
     for (let i = 0; i < x.length; i++) {
-        const p = {
-            px: x[i] - camX, 
-            py: y[i] - camY,
-        };
-
-        // Start from origin point and draw line to every updated state
+        const p = { px: x[i] - camA, py: y[i] - camB};
         i === 0 ? ctx.moveTo(p.px,p.py) : ctx.lineTo(p.px,p.py);
-        console.log(p);
     }
     
     ctx.stroke();
@@ -95,15 +127,15 @@ function drawTrail(ctx, trailX, trailY, camX, camY) {
 function drawGrid(ctx, camX, camY, spacing = va) {
     // Draw origin crosshairs in top view
     if (ctx == ctxTop) {
-        // const ox = ctx.canvas.width / 2 - camX - ctx.canvas.width / 2;
-        // const oy = ctx.canvas.height / 2 - camY - ctx.canvas.height / 2;
         const ox = -camX;
-        const oy = -camY;
+        const oy = camY;
 
         ctx.save();
         ctx.strokeStyle = COLOR.grn;
 
         ctx.beginPath();
+        ctx.fillStyle = 'red';
+        ctx.fillRect(ox, oy, 200, 200);
         ctx.moveTo(ox - 12, oy); ctx.lineTo(ox + 12, oy);
         ctx.moveTo(ox, oy - 12); ctx.lineTo(ox, oy + 12);
         ctx.stroke();
@@ -159,12 +191,12 @@ function drawTarg(ctx, px, py) {
     ctx.strokeStyle = COLOR.orange;
     ctx.lineWidth = 1.5;
     ctx.setLineDash([5, 5]);
-    ctx.arc(px, py, 40, 0, Math.PI * 2);
+    ctx.arc(px, py, va / 2, 0, Math.PI * 2);
     ctx.stroke();
     ctx.setLineDash([]);
 
     // DIAMOND
-    const ds = 10;
+    const ds = 8;
     ctx.beginPath();
     ctx.moveTo(px, py - ds);
     ctx.lineTo(px + ds, py);

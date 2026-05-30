@@ -55,8 +55,8 @@ function mainLoop(timestamp) {
      * Mz (differential torque)
      * Fz (heave thrust) */
     const I = {
-        F1, F2, Fx: F1 + F2,
-        Mz: (F1 - F2) * P.ly,
+        F1, F2, Fx: Math.min(F1 + F2, P.F_max),
+        Mz: (F2 - F1) * P.ly,
         Fz
     };
 
@@ -72,7 +72,7 @@ function mainLoop(timestamp) {
     // Trail
     if (G.frame % 3 === 0) {
         G.trailX.push(S.x); G.trailY.push(S.y); G.trailZ.push(S.z);
-        if (G.trailX.length > 300) {
+        if (G.trailX.length > 100) {
             G.trailX.shift(); G.trailY.shift(); G.trailZ.shift();
         }
     }
