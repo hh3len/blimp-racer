@@ -56,11 +56,8 @@ export function draw(state, target, game) {
     clearCanvas(ctxTop); clearCanvas(ctxSide);
 
     // GRID
-    // drawGrid(ctxTop, camX, camY);
-    // drawGrid(ctxSide, camX, camZ);
-
-    drawOrigin(ctxTop, sx, sy);
-    drawOrigin(ctxSide, sx, sz);
+    drawGrid(ctxTop, sx, sy, camX, camY);
+    drawGrid(ctxSide, sx, sz, camX, camZ);
 
     // TRAIL
     // drawTrail(ctxTop, game.trailX, game.trailY, camX, camY, game);
@@ -75,19 +72,6 @@ export function draw(state, target, game) {
     // BLIMP
     drawBody(ctxTop, state.psi);
     drawBody(ctxSide, state.psi);
-}
-
-
-// Working as intended
-function drawOrigin(ctx, sx, sy) {
-    const w = ctx.canvas.width;
-    const h = ctx.canvas.height;
-    console.log(w, h)
-
-    ctx.strokeStyle = 'red';
-    ctx.beginPath();
-    ctx.arc(w/2 - sx, h/2 + sy, 25, 0, 2 * Math.PI);
-    ctx.stroke();
 }
 
 // // Working!
@@ -137,24 +121,42 @@ function drawTrail(ctx, trailX, trailY, camA, camB) {
     ctx.stroke();
 }
 
-function drawGrid(ctx, camX, camY, spacing = va) {
+function drawGrid(ctx, sx, sy, camX, camY, spacing = va) {
     // Draw origin crosshairs in top view
-    // if (ctx == ctxTop) {
-        const ox = -camX;
-        const oy = camY;
+    // // if (ctx == ctxTop) {
+    //     const ox = -camX;
+    //     const oy = camY;
 
-        ctx.save();
-        ctx.strokeStyle = COLOR.grn;
+    //     ctx.save();
+    //     ctx.strokeStyle = COLOR.grn;
 
+    //     ctx.beginPath();
+    //     ctx.fillStyle = 'red';
+    //     ctx.fillRect(ox, oy, 200, 200);
+    //     ctx.moveTo(ox - 12, oy); ctx.lineTo(ox + 12, oy);
+    //     ctx.moveTo(ox, oy - 12); ctx.lineTo(ox, oy + 12);
+    //     ctx.stroke();
+
+    //     ctx.restore();
+    // // }
+
+    // Working as intended
+    function drawOrigin(ctx, sx, sy) {
+        const w = ctx.canvas.width;
+        const h = ctx.canvas.height;
+        console.log(w, h)
+
+        ctx.strokeStyle = COLOR.grn; ctx.lineWidth = 4;
+        
         ctx.beginPath();
-        ctx.fillStyle = 'red';
-        ctx.fillRect(ox, oy, 200, 200);
-        ctx.moveTo(ox - 12, oy); ctx.lineTo(ox + 12, oy);
-        ctx.moveTo(ox, oy - 12); ctx.lineTo(ox, oy + 12);
+        ctx.moveTo(w/2 - sx - 12, h/2 + sy, 25, 0, 2 * Math.PI);
+        ctx.lineTo(w/2 - sx + 12, h/2 + sy, 25, 0, 2 * Math.PI);
+        ctx.moveTo(w/2 - sx, h/2 + sy - 12, 25, 0, 2 * Math.PI);
+        ctx.lineTo(w/2 - sx, h/2 + sy + 12, 25, 0, 2 * Math.PI);
         ctx.stroke();
+    }
 
-        ctx.restore();
-    // }
+    drawOrigin(ctx, sx, sy);
 
     ctx.strokeStyle = COLOR.grid;
     ctx.lineWidth = 0.8;
