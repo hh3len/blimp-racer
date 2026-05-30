@@ -122,42 +122,23 @@ function drawTrail(ctx, trailX, trailY, camA, camB) {
 }
 
 function drawGrid(ctx, sx, sy, camX, camY, spacing = va) {
-    // Draw origin crosshairs in top view
-    // // if (ctx == ctxTop) {
-    //     const ox = -camX;
-    //     const oy = camY;
-
-    //     ctx.save();
-    //     ctx.strokeStyle = COLOR.grn;
-
-    //     ctx.beginPath();
-    //     ctx.fillStyle = 'red';
-    //     ctx.fillRect(ox, oy, 200, 200);
-    //     ctx.moveTo(ox - 12, oy); ctx.lineTo(ox + 12, oy);
-    //     ctx.moveTo(ox, oy - 12); ctx.lineTo(ox, oy + 12);
-    //     ctx.stroke();
-
-    //     ctx.restore();
-    // // }
-
-    // Working as intended
-    function drawOrigin(ctx, sx, sy) {
+    // Draw origin crosshairs
+    (() => {
         const w = ctx.canvas.width;
         const h = ctx.canvas.height;
-        console.log(w, h)
 
-        ctx.strokeStyle = COLOR.grn; ctx.lineWidth = 4;
-        
+        ctx.save();
+        ctx.lineWidth = 4;
         ctx.beginPath();
         ctx.moveTo(w/2 - sx - 12, h/2 + sy, 25, 0, 2 * Math.PI);
         ctx.lineTo(w/2 - sx + 12, h/2 + sy, 25, 0, 2 * Math.PI);
         ctx.moveTo(w/2 - sx, h/2 + sy - 12, 25, 0, 2 * Math.PI);
         ctx.lineTo(w/2 - sx, h/2 + sy + 12, 25, 0, 2 * Math.PI);
         ctx.stroke();
-    }
+        ctx.restore();
+    }) ();
 
-    drawOrigin(ctx, sx, sy);
-
+    ctx.save();
     ctx.strokeStyle = COLOR.grid;
     ctx.lineWidth = 0.8;
 
@@ -180,6 +161,7 @@ function drawGrid(ctx, sx, sy, camX, camY, spacing = va) {
         ctx.lineTo(ctx.canvas.width, y);
         ctx.stroke();
     }
+    ctx.restore();
 
     // Draw ground
     if (ctx == ctxSide) {
@@ -187,7 +169,6 @@ function drawGrid(ctx, sx, sy, camX, camY, spacing = va) {
        
         ctx.beginPath();
         ctx.moveTo(0, ctx.canvas.height - camY); ctx.lineTo(ctx.canvas.width, ctx.canvas.height - camY);
-        ctx.strokeStyle = COLOR.grn;
         ctx.stroke();
 
         ctx.fillRect(0, ctx.canvas.height - camY, ctx.canvas.width, ctx.canvas.height);
@@ -201,6 +182,7 @@ function drawGrid(ctx, sx, sy, camX, camY, spacing = va) {
 
 // Draw target circles
 function drawTarg(ctx, px, py) {
+    ctx.save();
     // CIRCLE
     ctx.beginPath();
     ctx.strokeStyle = COLOR.orange;
@@ -220,6 +202,8 @@ function drawTarg(ctx, px, py) {
     ctx.closePath();
     ctx.fillStyle = COLOR.gold;
     ctx.fill();
+
+    ctx.restore();
 };
 
 // save current canvas
@@ -242,7 +226,6 @@ function drawBody(ctx, psi) {
     ctx.ellipse(0, 0, length, vb, 0, 0, Math.PI * 2);
     ctx.fillStyle = COLOR.body;
     ctx.fill();
-    ctx.strokeStyle = COLOR.grn;
     ctx.lineWidth = 2;
     ctx.stroke();
 
@@ -254,6 +237,7 @@ function drawBody(ctx, psi) {
 
 // Works as intended
 function drawDetailsTop() {
+    ctxTop.save();
     // Nose highlight
     ctxTop.beginPath();
 
@@ -266,9 +250,9 @@ function drawDetailsTop() {
     ctxTop.fillStyle = COLOR.nose;
     ctxTop.fill();
 
+    ctxTop.save();
     // Clip outside of blimp
     (() => {
-        ctxTop.save();
         ctxTop.beginPath();
         ctxTop.rect(-canvasTop.width, -canvasTop.height, canvasTop.width * 2, canvasTop.height * 2);
         ctxTop.ellipse(0, 0, va, vb, 0, 0, Math.PI * 2);
@@ -278,7 +262,6 @@ function drawDetailsTop() {
     // L/R fins
     ctxTop.fillStyle = COLOR.fin;
     ctxTop.lineCap = "round";
-    ctxTop.strokeStyle = COLOR.grn;
     ctxTop.lineWidth = 1;
 
     ctxTop.beginPath();
@@ -295,8 +278,7 @@ function drawDetailsTop() {
 
     ctxTop.fill();
     ctxTop.stroke();
-
-    ctxTop.restore();
+    ctxTop.restore(); // Ends clip outside of blimp
 
     // Top fin
     ctxTop.beginPath();
@@ -307,6 +289,8 @@ function drawDetailsTop() {
     ctxTop.lineTo(-22, 3);
     ctxTop.lineWidth = 2.75;
     ctxTop.stroke();
+
+    ctxTop.restore();
 }
 
 // WIP
@@ -345,7 +329,6 @@ function drawDetailsSide(angle) {
         ctxSide.closePath();
         ctxSide.fillStyle = COLOR.fin;
         ctxSide.fill();
-        ctxSide.strokeStyle = COLOR.grn;
         ctxSide.stroke();
     }
 
