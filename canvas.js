@@ -62,8 +62,8 @@ export function draw(state, target, game) {
     clearCanvas(ctxTop); clearCanvas(ctxSide);
 
     // GRID
-    drawGrid(ctxTop, sx, sy, camX, camY);
-    drawGrid(ctxSide, sx, sz, camX, camZ);
+    drawGrid(ctxTop, sx, sy);
+    drawGrid(ctxSide, sx, sz);
 
     // TRAIL
     // drawTrail(ctxTop, game.trailX, game.trailY, camX, camY, game);
@@ -127,7 +127,7 @@ function drawTrail(ctx, trailX, trailY, camA, camB) {
     ctx.stroke();
 }
 
-function drawGrid(ctx, sx, sy, camX, camY, spacing = va) {
+function drawGrid(ctx, sx, sy, spacing = va) {
     const w = ctx.canvas.width;
     const h = ctx.canvas.height;
 
@@ -168,21 +168,22 @@ function drawGrid(ctx, sx, sy, camX, camY, spacing = va) {
     }
     ctx.restore();
 
-    // Draw ground //camY = canvasY - h / 2; //canvasY = h - sy;
+    // Draw ground 
+    // camY = canvasY - h / 2; // canvasY = h - sy;
     // camY = h - sy - h/2 = h/2 - sy
     // h - camY = h - h/2 + sy = h/2 + sy
-
     if (ctx == ctxSide) {
+        const g = h/2 + sy;
         ctx.save();
        
         ctx.beginPath();
-        ctx.moveTo(0, h/2 + sy); ctx.lineTo(w, h - camY);
+        ctx.moveTo(0, g); ctx.lineTo(w, g);
         ctx.stroke();
 
-        ctx.fillRect(0, h - camY, w, h);
+        ctx.fillRect(0, g, w, h);
 
         ctx.textAlign = 'left'; ctx.font = '0.8rem Share Tech Mono'; ctx.fillStyle = COLOR.grnDim;
-        ctx.fillText('GROUND', 5, h - camY + 15); 
+        ctx.fillText('GROUND', 5, g + 15); 
         
         ctx.restore();
     }
