@@ -1,7 +1,7 @@
 import {P} from './physics.js';
 import * as U from './utils.js';
 
-export function updateSB(state, target, game, input) {
+export function updateSB(game, state, target, input) {
     // VEHICLE
     document.getElementById('x').textContent = U.format(state.x);
     document.getElementById('y').textContent = U.format(state.y);
@@ -17,9 +17,9 @@ export function updateSB(state, target, game, input) {
     document.getElementById('m3').style.width = Math.min(Math.abs(input.Fz) / P.F_max, 1) * 100 + '%';
 
     // TARGET
-    document.getElementById('dist').textContent = U.format(U.dist(target, state).dist2D);
-    document.getElementById('dz').textContent = U.format(U.dist(target, state).dz);
-    document.getElementById('brg').textContent = U.format(U.dist(target, state).brg) + '°';
+    document.getElementById('dist').textContent = U.format(U.dist(state, target).dist2D);
+    document.getElementById('dz').textContent = U.format(U.dist(state, target).dz);
+    document.getElementById('brg').textContent = U.format(U.dist(state, target).brg) + '°';
 
     // SCORE
     document.getElementById('score').textContent = game.score;

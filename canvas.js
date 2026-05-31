@@ -27,7 +27,7 @@ resizeCanvases();
 const va = P.a * P.SCALE;
 const vb = P.b * P.SCALE;
 
-export function draw(state, target, game) {
+export function draw(game, state, target) {
     // Convert m -> px
     const sx = state.x * P.SCALE; const sy = state.y * P.SCALE; const sz = state.z * P.SCALE;
     const tx = target.x * P.SCALE; const ty = target.y * P.SCALE; const tz = target.z * P.SCALE;

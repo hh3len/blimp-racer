@@ -4,16 +4,20 @@ import * as CV from './canvas.js';
 import * as SB from './sidebar.js';
 
 // Stores global x/y/z position [m], heading [rad], surge/heave/yaw velocity [m/s]
-const newState = ()=> ({ x: 0.0, y: 0.0, z: 1.0, psi: 0.0, u: 0.0, w: 0.0, r: 0.0 });
-const newGame = ()=> ({ timerStarted: false, startTime: null, score: 0, trailX: [], trailY: [], trailZ: [], frame: 0 }); // Timer, score, and display variables
-const newTarget = ()=> ({ x: (Math.random() - 0.5) * 6, y: (Math.random() - 0.5) * 6, z: Math.random() * 3 + 0.5 }); // Target position
+const newState = () => ({ x: 0.0, y: 0.0, z: 1.0, psi: 0.0, u: 0.0, w: 0.0, r: 0.0 });
+const newGame = () => ({ timerStarted: false, startTime: null, score: 0, captured: false, trailX: [], trailY: [], trailZ: [], frame: 0 }); // Timer, score, captured, and display variables
+const newTarget = () => ({ x: (Math.random() - 0.5) * 6, y: (Math.random() - 0.5) * 6, z: Math.random() * 3 + 0.5 }); // Target position
 
 // Initialize variables
 let S = newState();
 let G = newGame();
 let T = newTarget();
 
-const reset = ()=> { S = newState(); G = newGame(); T = newTarget(); }; // Resets board
+function reset() { S = newState(); G = newGame(); T = newTarget(); }; // Resets board
+function triggerFlash() {
+ const el = document.getElementById('flash'); 
+ el.style.opacity = '0.3'; setTimeout(() => { el.style.opacity = '0'; }, 120);
+}
 
 // User-controlled inputs
 const keys = { up: false, down: false, left: false, right: false };
@@ -29,10 +33,8 @@ document.addEventListener('keydown', e => {
         case 'n': case 'N': T = newTarget(); break;
     }
 
-    if (!G.timerStarted) {
-        G.timerStarted = true;
-        G.startTime = performance.now();
-    }
+    // Start timer on keypress
+    if (!G.timerStarted) { G.timerStarted = true; G.startTime = performance.now(); }
 });
 
 document.addEventListener('keyup', e => {
@@ -44,7 +46,7 @@ document.addEventListener('keyup', e => {
     }
 });
 
-function mainLoop(timestamp) {
+function mainLoop() {
     const F1 = keys.left ? P.F_step : 0;
     const F2 = keys.right ? P.F_step : 0;
     
@@ -56,8 +58,7 @@ function mainLoop(timestamp) {
      * Fz (heave thrust) */
     const I = {
         F1, F2, Fx: Math.min(F1 + F2, P.F_max),
-        Mz: (F2 - F1) * P.ly,
-        Fz
+        Mz: (F2 - F1) * P.ly, Fz
     };
 
     // Compute & update state
@@ -81,13 +82,14 @@ function mainLoop(timestamp) {
     if (U.dist(S, T).dist < P.CAPTURE_RAD) {
         G.score++;
         T = newTarget();
+        triggerFlash();
     }
 
     // Update frame count
     G.frame++;
 
-    CV.draw(S, T, G);
-    SB.updateSB(S, T, G, I);
+    CV.draw(G, S, T);
+    SB.updateSB(G, S, T, I);
     requestAnimationFrame(mainLoop);
 }
 
