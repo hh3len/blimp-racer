@@ -1,7 +1,7 @@
 import {P} from './physics.js';
 import * as U from './utils.js';
 
-export function updateSB(state, target, input, score, timerStarted, t) {
+export function updateSB(game, state, target, input) {
     // VEHICLE
     document.getElementById('x').textContent = U.format(state.x);
     document.getElementById('y').textContent = U.format(state.y);
@@ -17,20 +17,17 @@ export function updateSB(state, target, input, score, timerStarted, t) {
     document.getElementById('m3').style.width = Math.min(Math.abs(input.Fz) / P.F_max, 1) * 100 + '%';
 
     // TARGET
-    // document.getElementById('dx').textContent = U.format(U.dist(target, state).dx);
-    // document.getElementById('dy').textContent = U.format(U.dist(target, state).dy);
-    document.getElementById('dz').textContent = U.format(U.dist(target, state).dz);
-
-    document.getElementById('dist').textContent = U.format(U.dist(target, state).dist2D);
-    document.getElementById('brg').textContent = U.format(U.dist(target, state).brg) + '°';
+    document.getElementById('dist').textContent = U.format(U.dist(state, target).dist2D);
+    document.getElementById('dz').textContent = U.format(U.dist(state, target).dz);
+    document.getElementById('brg').textContent = U.format(U.dist(state, target).brg) + '°';
 
     // SCORE
-    document.getElementById('score').textContent = score;
+    document.getElementById('score').textContent = game.score;
     
     // SYSTEM
-    if (timerStarted) {
+    if (game.timerStarted) {
         // Calculate current time
-        const elapsed = (performance.now() - t) / 1000;
+        const elapsed = (performance.now() - game.startTime) / 1000;
         const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
         const ss = String(Math.floor(elapsed % 60)).padStart(2, '0');
         document.getElementById('time-elapsed').textContent = 'T+' + mm + ':' + ss;
