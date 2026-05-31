@@ -481,23 +481,14 @@ body {
       margin-bottom: 9px;
     }
 
-    /* #fps {
-      font-size: 0.67rem;
-      color: var(--txt);
-      text-align: center;
-      letter-spacing: 0.12em;
-      margin-bottom: 10px;
-    } */
-
-    #time-elapsed {
-        font-size: 0.8rem;
-        color: var(--darkG);
+    .system-stats {
+      font-size: 0.8rem;
+      color: var(--darkG);
     }
 
-    /* Flash overlay on capture */
     #flash {
       position: fixed; inset: 0;
-      background: var(--G);
+      background: var(--lightG);
       opacity: 0;
       pointer-events: none;
       z-index: 999;

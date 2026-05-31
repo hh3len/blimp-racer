@@ -16,7 +16,7 @@ let T = newTarget();
 function reset() { S = newState(); G = newGame(); T = newTarget(); }; // Resets board
 function triggerFlash() {
  const el = document.getElementById('flash'); 
- el.style.opacity = '0.3'; setTimeout(() => { el.style.opacity = '0'; }, 120);
+ el.style.opacity = '0.25'; setTimeout(() => { el.style.opacity = '0'; }, 100);
 }
 
 // User-controlled inputs
@@ -46,7 +46,7 @@ document.addEventListener('keyup', e => {
     }
 });
 
-function mainLoop() {
+function mainLoop(timestamp) {
     const F1 = keys.left ? P.F_step : 0;
     const F2 = keys.right ? P.F_step : 0;
     const Fz = (keys.up ? P.F_step_v : 0) - (keys.down ? P.F_step_v : 0); 
@@ -58,7 +58,7 @@ function mainLoop() {
      * Fx (surge thrust)
      * Mz (differential torque)
      * Fz (heave thrust) */
-    const I = { Fx: Math.min(F1 + F2, P.F_max), Mz: (F1 - F2) * P.ly, Fz };
+    const I = { Fx: F1 + F2, Mz: (F1 - F2) * P.ly, Fz };
 
     // Compute & update state
     S = rk4(S, I);
@@ -75,22 +75,34 @@ function mainLoop() {
         if (G.trailX.length > 100) {
             G.trailX.shift(); G.trailY.shift(); G.trailZ.shift();
         }
+        G.frame = 0;
     }
+    G.frame++; // Update loop counter
 
     // Capture check
     if (U.dist(S, T).dist3D < P.CAPTURE_RAD) {
-        G.score++;
-        T = newTarget();
-        triggerFlash();
+        G.score++; T = newTarget(); triggerFlash();
     }
 
-    // Update frame count
-    G.frame++;
-
     CV.draw(G, S, T);
-    SB.updateSB(G, S, T, I);
+    SB.updateSB(G, S, T, thrust);
     requestAnimationFrame(mainLoop);
 }
 
-// Game loop
+let lastTime = 0, fpsAccum = 0, fpsCount = 0, fpsDisplay = 0;
+
+function timerLoop(timestamp) {
+ const dt = Math.min((timestamp - lastTime) / 1000, 0.05); // cap at 50ms
+ const E = document.getElementById('fps');
+ lastTime = timestamp; fpsAccum += dt; fpsCount++;
+
+ if (fpsAccum >= 0.5) { fpsDisplay = fpsCount / fpsAccum; fpsAccum = 0; fpsCount = 0; }
+
+ const fps = fpsCount % 100 === 0 ? '0' : fpsDisplay.toFixed(0); 
+ E.textContent = fps + ' FPS';
+
+ requestAnimationFrame(timerLoop);
+}
+
 requestAnimationFrame(mainLoop);
+requestAnimationFrame(timerLoop);

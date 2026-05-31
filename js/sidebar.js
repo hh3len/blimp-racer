@@ -20,10 +20,10 @@ const E = {
     brg: document.getElementById('brg'),
 
     score: document.getElementById('score'),
-    timer: document.getElementById('time-elapsed'),
+    timer: document.getElementById('time'),
 };
 
-export function updateSB(game, state, target, input) {
+export function updateSB(game, state, target, thrust) {
     // VEHICLE
     E.x.textContent = U.format(state.x);
     E.y.textContent = U.format(state.y);
@@ -34,9 +34,9 @@ export function updateSB(game, state, target, input) {
     E.r.textContent = U.format(state.r);
 
     // MOTORS
-    E.m1.style.width = Math.min(input.F1 / P.F_max, 1) * 100 + '%';
-    E.m2.style.width = Math.min(input.F2 / P.F_max, 1) * 100 + '%';
-    E.m3.style.width = Math.min(Math.abs(input.Fz) / P.F_max, 1) * 100 + '%';
+    E.m1.style.width = Math.min(thrust.F1 / P.F_max, 1) * 100 + '%';
+    E.m2.style.width = Math.min(thrust.F2 / P.F_max, 1) * 100 + '%';
+    E.m3.style.width = Math.min(Math.abs(thrust.Fz) / P.F_max, 1) * 100 + '%';
 
     // TARGET
     const delta = U.dist(state, target);
@@ -46,12 +46,11 @@ export function updateSB(game, state, target, input) {
     E.brg.textContent = U.format(delta.brg) + '°';
 
     // SCORE
-    E.score.textContent = game.sc;
+    E.score.textContent = game.score;
     
     // SYSTEM
     if (game.timerStarted) {
-        // Calculate current time
-        const elapsed = (performance.now() - game.t) / 1000;
+        const elapsed = (performance.now() - game.startTime) / 1000;
         const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
         const ss = String(Math.floor(elapsed % 60)).padStart(2, '0');
         E.timer.textContent = 'T+' + mm + ':' + ss;
