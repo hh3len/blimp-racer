@@ -29,125 +29,92 @@ const vb = P.b * P.SCALE;
 
 export function draw(state, target, game) {
     // Convert m -> px
-    const sx = state.x * P.SCALE;
-    const sy = state.y * P.SCALE;
-    const sz = state.z * P.SCALE;
+    const sx = state.x * P.SCALE; const sy = state.y * P.SCALE; const sz = state.z * P.SCALE;
+    const tx = target.x * P.SCALE; const ty = target.y * P.SCALE; const tz = target.z * P.SCALE;
+    const trailX = game.trailX; const trailY = game.trailY; const trailZ = game.trailZ;
 
-    const tx = target.x * P.SCALE;
-    const ty = target.y * P.SCALE;
-    const tz = target.z * P.SCALE;
-
-    // Default canvas styles
-    ctxTop.lineWidth = 1.5; ctxTop.strokeStyle = COLOR.grn;
-    ctxTop.fillStyle = COLOR.body;
-    ctxSide.lineWidth = 1.5; ctxSide.strokeStyle = COLOR.grn;
-    ctxSide.fillStyle = COLOR.body;
+    // SET DEFAULT CANVAS STYLES
+    let setStyles = ctx => { ctx.lineWidth = 1.5; ctx.strokeStyle = COLOR.grn; ctx.fillStyle = COLOR.body; }
+    setStyles(ctxTop); setStyles(ctxSide);
 
     // CLEAR CANVAS
-    let clearCanvas = ctx => { ctx.fillStyle = COLOR.bg; ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height); };
+    let clearCanvas = ctx => { ctx.save(); ctx.fillStyle = COLOR.bg; ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height); ctx.restore(); };
     clearCanvas(ctxTop); clearCanvas(ctxSide);
 
-    // GRID
-    drawGrid(ctxTop, sx, sy);
-    drawGrid(ctxSide, sx, sz);
-
-    // TRAIL
-    drawTrail(ctxTop, sx, sy, game.trailX, game.trailY);
-    drawTrail(ctxSide, sx, sz, game.trailX, game.trailZ);
+    // ENVIRONMENT (grid, origin, ground, trail)
+    drawEnv(ctxTop, sx, sy, trailX, trailY); drawEnv(ctxSide, sx, sz, trailX, trailZ);
 
     // TARGET
-    drawTarg(ctxTop, tx, ty, sx, sy);
-    drawTarg(ctxSide, tx, tz, sx, sz);
+    drawTarg(ctxTop, tx, ty, sx, sy); drawTarg(ctxSide, tx, tz, sx, sz);
     
     // BLIMP
-    drawBody(ctxTop, state.psi);
-    drawBody(ctxSide, state.psi);
+    drawBody(ctxTop, state.psi); drawBody(ctxSide, state.psi);
 }
 
-function drawGrid(ctx, sx, sy, spacing = va) {
+function drawEnv(ctx, sx, sy, trailX, trailY, spacing = va) {
+    // Canvas
     const w = ctx.canvas.width;
     const h = ctx.canvas.height;
 
-    // Draw origin crosshairs
-    (() => {
-        ctx.save();
-        ctx.lineWidth = 4;
-        ctx.beginPath();
+    // Draw origin
+    if (ctx == ctxTop) {
+        ctx.save(); ctx.lineWidth = 3; ctx.beginPath();
         ctx.moveTo(w/2 - sx - 12, h/2 + sy, 25, 0, 2 * Math.PI);
         ctx.lineTo(w/2 - sx + 12, h/2 + sy, 25, 0, 2 * Math.PI);
         ctx.moveTo(w/2 - sx, h/2 + sy - 12, 25, 0, 2 * Math.PI);
         ctx.lineTo(w/2 - sx, h/2 + sy + 12, 25, 0, 2 * Math.PI);
-        ctx.stroke();
-        ctx.restore();
-    }) ();
-
-    ctx.save();
-    ctx.lineWidth = 1; ctx.strokeStyle = COLOR.grid;
-
-    // Extend grid values infinitely
-    const wrappedX = ((-sx) % spacing + spacing) % spacing;
-    const wrappedY = ((sy) % spacing + spacing) % spacing;
-
-    // Vertical lines
-    for (let x = wrappedX; x < w; x += spacing) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, ctx.canvas.height);
-        ctx.stroke();
+        ctx.stroke(); ctx.restore();
     }
-
-    // Horiz lines
-    for (let y = wrappedY; y < h; y += spacing) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(ctx.canvas.width, y);
-        ctx.stroke();
-    }
-    ctx.restore();
 
     // Draw ground 
     if (ctx == ctxSide) {
-        const g = h/2 + sy;
-        ctx.save();
-       
-        ctx.beginPath();
-        ctx.moveTo(0, g); ctx.lineTo(w, g);
-        ctx.stroke();
+        const g = h/2 + sy; ctx.save(); ctx.beginPath();
+        ctx.moveTo(0, g); ctx.lineTo(w, g); ctx.stroke();
+        ctx.fillStyle = COLOR.bg; ctx.fillRect(0, g, w, h);
+        ctx.font = '0.8rem Share Tech Mono'; ctx.fillStyle = COLOR.darkG;
+        ctx.fillText('GROUND', 5, g + 15); ctx.restore();
+    }
 
-        ctx.fillRect(0, g, w, h);
+    // Draw gridlines
+    (() => {
+        ctx.save(); ctx.lineWidth = 1; ctx.strokeStyle = COLOR.grid;
 
-        ctx.textAlign = 'left'; ctx.font = '0.8rem Share Tech Mono'; ctx.fillStyle = COLOR.darkG;
-        ctx.fillText('GROUND', 5, g + 15); 
-        
+        // Extend grid values infinitely
+        const wrappedX = ((-sx) % spacing + spacing) % spacing;
+        const wrappedY = ((sy) % spacing + spacing) % spacing;
+
+        // Vertical lines
+        for (let x = wrappedX; x < w; x += spacing) {
+            ctx.beginPath(); ctx.moveTo(x, 0);
+            ctx.lineTo(x, ctx.canvas.height); ctx.stroke();
+        }
+
+        // Horiz lines
+        for (let y = wrappedY; y < h; y += spacing) {
+            ctx.beginPath(); ctx.moveTo(0, y);
+            ctx.lineTo(ctx.canvas.width, y); ctx.stroke();
+        }
         ctx.restore();
-    }
+    }) ();
+
+    // Draw disappearing trail
+    (() => {
+        // Convert trail m -> px and translate by canvas origin
+        const x = trailX.map(i => w/2 + i * P.SCALE);
+        const y = trailY.map(i => h/2 - i * P.SCALE);
+
+        ctx.save(); ctx.beginPath(); ctx.strokeStyle = COLOR.grn + '80'; //opacity
+        for (let i = 0; i < x.length; i++) {
+            const p = { px: x[i] - sx, py: y[i] + sy};
+            i === 0 ? ctx.moveTo(p.px,p.py) : ctx.lineTo(p.px,p.py);
+        }
+        ctx.stroke(); ctx.restore();
+    }) ();
 };
-
-function drawTrail(ctx, sx, sy, trailX, trailY) {
-    // Canvas
-    const w = ctx.canvas.width;
-    const h = ctx.canvas.height;
-    
-    // Convert trail m -> px and offset by canvas origin
-    const x = trailX.map(i => w/2 + i * P.SCALE);
-    const y = trailY.map(i => h/2 - i * P.SCALE);
-
-    ctx.save();
-    ctx.strokeStyle = COLOR.grn + '80'; //opacity
-    ctx.beginPath();
-
-    for (let i = 0; i < x.length; i++) {
-        const p = { px: x[i] - sx, py: y[i] + sy};
-        i === 0 ? ctx.moveTo(p.px,p.py) : ctx.lineTo(p.px,p.py);
-    }
-
-    ctx.stroke();
-    ctx.restore();
-}
 
 // Draw target circles
 function drawTarg(ctx, tx, ty, sx, sy) {
-     // Canvas
+    // Canvas
     const w = ctx.canvas.width;
     const h = ctx.canvas.height;
 
@@ -156,25 +123,18 @@ function drawTarg(ctx, tx, ty, sx, sy) {
     const py = h/2 - ty + sy;
 
     ctx.save();
-
     // CIRCLE
     ctx.beginPath();
-    ctx.strokeStyle = COLOR.orange;
-    ctx.setLineDash([5, 5]);
-    ctx.arc(px, py, va / 2, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
+    ctx.strokeStyle = COLOR.orange; ctx.setLineDash([5, 5]);
+    ctx.arc(px, py, va / 2, 0, Math.PI * 2); ctx.stroke();
+    
     // DIAMOND
-    const ds = 8;
-    ctx.beginPath();
+    const ds = 8; ctx.beginPath();
     ctx.moveTo(px, py - ds);
     ctx.lineTo(px + ds, py);
     ctx.lineTo(px, py + ds);
     ctx.lineTo(px - ds, py);
-    ctx.closePath();
-    ctx.fillStyle = COLOR.gold;
-    ctx.fill();
+    ctx.fillStyle = COLOR.gold; ctx.fill();
 
     ctx.restore();
 };
