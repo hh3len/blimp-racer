@@ -18,137 +18,125 @@ function resizeCanvases() {
 window.addEventListener('resize', resizeCanvases);
 resizeCanvases();
 
+// CONVERSION STEPS:
+// Canvas-relative origin = (w/2, h/2)
+// Canvas-relative point of interest = (w/2 + tx, h/2 - ty)
+// Entire canvas shift due to ship motion = ((w/2 + tx) - sx, (h/2 - ty) + sy)
+
 // Convert m -> px
 const va = P.a * P.SCALE;
 const vb = P.b * P.SCALE;
 
-export function draw(state, target) {
+export function draw(game, state, target) {
     // Convert m -> px
-    const sx = state.x * P.SCALE;
-    const sy = state.y * P.SCALE;
-    const sz = state.z * P.SCALE;
+    const sx = state.x * P.SCALE; const sy = state.y * P.SCALE; const sz = state.z * P.SCALE;
+    const tx = target.x * P.SCALE; const ty = target.y * P.SCALE; const tz = target.z * P.SCALE;
+    const trailX = game.trailX; const trailY = game.trailY; const trailZ = game.trailZ;
 
-    const tx = target.x * P.SCALE;
-    const ty = target.y * P.SCALE;
-    const tz = target.z * P.SCALE;
-
-    // Flip z-axis
-    const canvasZ = canvasSide.height - sz;
-    const targetCanvasZ = canvasSide.height - tz;
-
-    // Camera offsets
-    const camX = sx - canvasTop.width / 2;
-    const camY = sy - canvasTop.height / 2;
-    const camZ = canvasZ - canvasSide.height / 2;
+    // SET DEFAULT CANVAS STYLES
+    let setStyles = ctx => { ctx.lineWidth = 1.5; ctx.strokeStyle = COLOR.grn; ctx.fillStyle = COLOR.body; }
+    setStyles(ctxTop); setStyles(ctxSide);
 
     // CLEAR CANVAS
-    let clearCanvas = (ctx) => {
-        ctx.fillStyle = COLOR.bg;
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    };
+    let clearCanvas = ctx => { ctx.save(); ctx.fillStyle = COLOR.bg; ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height); ctx.restore(); };
+    clearCanvas(ctxTop); clearCanvas(ctxSide);
 
-    clearCanvas(ctxTop);
-    clearCanvas(ctxSide);
-
-    // GRID
-    drawGrid(ctxTop, camX, camY);
-    drawGrid(ctxSide, camX, camZ);
+    // ENVIRONMENT (grid, origin, ground, trail)
+    drawEnv(ctxTop, sx, sy, trailX, trailY); drawEnv(ctxSide, sx, sz, trailX, trailZ);
 
     // TARGET
-    drawTarg(ctxTop, tx - camX, ty - camY);
-    drawTarg(ctxSide, tx - camX, targetCanvasZ - camZ);
+    drawTarg(ctxTop, tx, ty, sx, sy); drawTarg(ctxSide, tx, tz, sx, sz);
     
     // BLIMP
-    // drawBody(ctxTop, sx, sy, state.psi);
-    // drawBody(ctxSide, sx, canvasZ, state.psi);
-
-    drawBody(ctxTop, canvasTop.width / 2, canvasTop.height / 2, state.psi);
-    drawBody(ctxSide, canvasSide.width / 2, canvasSide.height / 2, state.psi);
+    drawBody(ctxTop, state.psi); drawBody(ctxSide, state.psi);
 }
 
-// Works as intended
-function drawGrid(ctx, camX, camY, spacing = va) {
+function drawEnv(ctx, sx, sy, trailX, trailY, spacing = va) {
+    // Canvas
+    const w = ctx.canvas.width;
+    const h = ctx.canvas.height;
 
-    // Draw origin crosshairs for top view
+    // Draw origin
     if (ctx == ctxTop) {
-        // const ox = ctx.canvas.width / 2 - camX - ctx.canvas.width / 2;
-        // const oy = ctx.canvas.height / 2 - camY - ctx.canvas.height / 2;
-        const ox = -camX;
-        const oy = -camY;
-
-        ctx.save();
-        ctx.strokeStyle = COLOR.grn;
-
-        ctx.beginPath();
-        ctx.moveTo(ox - 12, oy); ctx.lineTo(ox + 12, oy);
-        ctx.moveTo(ox, oy - 12); ctx.lineTo(ox, oy + 12);
-        ctx.stroke();
-
-        ctx.restore();
+        ctx.save(); ctx.lineWidth = 3; ctx.beginPath();
+        ctx.moveTo(w/2 - sx - 12, h/2 + sy, 25, 0, 2 * Math.PI);
+        ctx.lineTo(w/2 - sx + 12, h/2 + sy, 25, 0, 2 * Math.PI);
+        ctx.moveTo(w/2 - sx, h/2 + sy - 12, 25, 0, 2 * Math.PI);
+        ctx.lineTo(w/2 - sx, h/2 + sy + 12, 25, 0, 2 * Math.PI);
+        ctx.stroke(); ctx.restore();
     }
 
-    ctx.strokeStyle = COLOR.grid;
-    ctx.lineWidth = 0.8;
-
-    // Extend grid values infinitely
-    const wrappedX = ((-camX) % spacing + spacing) % spacing;
-    const wrappedY = ((-camY) % spacing + spacing) % spacing;
-
-    // Vertical lines
-    for (let x = wrappedX; x < ctx.canvas.width; x += spacing) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, ctx.canvas.height);
-        ctx.stroke();
-    }
-
-    // Horiz lines
-    for (let y = wrappedY; y < ctx.canvas.height; y += spacing) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(ctx.canvas.width, y);
-        ctx.stroke();
-    }
-
-    // Draw ground
+    // Draw ground 
     if (ctx == ctxSide) {
-        ctx.save();
-       
-        ctx.beginPath();
-        ctx.moveTo(0, ctx.canvas.height - camY); ctx.lineTo(ctx.canvas.width, ctx.canvas.height - camY);
-        ctx.strokeStyle = COLOR.grn;
-        ctx.stroke();
-
-        ctx.fillRect(0, ctx.canvas.height - camY, ctx.canvas.width, ctx.canvas.height);
-
-        ctx.textAlign = 'left'; ctx.font = '0.8rem Share Tech Mono'; ctx.fillStyle = COLOR.darkG;
-        ctx.fillText('GROUND', 5, ctx.canvas.height - camY + 15); 
-        
-        ctx.restore();
+        const g = h/2 + sy; ctx.save(); ctx.beginPath();
+        ctx.moveTo(0, g); ctx.lineTo(w, g); ctx.stroke();
+        ctx.fillStyle = COLOR.bg; ctx.fillRect(0, g, w, h);
+        ctx.font = '0.8rem Share Tech Mono'; ctx.fillStyle = COLOR.darkG;
+        ctx.fillText('GROUND', 5, g + 15); ctx.restore();
     }
+
+    // Draw gridlines
+    (() => {
+        ctx.save(); ctx.lineWidth = 1; ctx.strokeStyle = COLOR.grid;
+
+        // Extend grid values infinitely
+        const wrappedX = ((-sx) % spacing + spacing) % spacing;
+        const wrappedY = ((sy) % spacing + spacing) % spacing;
+
+        // Vertical lines
+        for (let x = wrappedX; x < w; x += spacing) {
+            ctx.beginPath(); ctx.moveTo(x, 0);
+            ctx.lineTo(x, ctx.canvas.height); ctx.stroke();
+        }
+
+        // Horiz lines
+        for (let y = wrappedY; y < h; y += spacing) {
+            ctx.beginPath(); ctx.moveTo(0, y);
+            ctx.lineTo(ctx.canvas.width, y); ctx.stroke();
+        }
+        ctx.restore();
+    }) ();
+
+    // Draw disappearing trail
+    (() => {
+        // Convert trail m -> px and translate by canvas origin
+        const x = trailX.map(i => w/2 + i * P.SCALE);
+        const y = trailY.map(i => h/2 - i * P.SCALE);
+
+        ctx.save(); ctx.beginPath(); ctx.strokeStyle = COLOR.grn + '80'; //opacity
+        for (let i = 0; i < x.length; i++) {
+            const p = { px: x[i] - sx, py: y[i] + sy};
+            i === 0 ? ctx.moveTo(p.px,p.py) : ctx.lineTo(p.px,p.py);
+        }
+        ctx.stroke(); ctx.restore();
+    }) ();
 };
 
-// Works as intended
-function drawTarg(ctx, px, py) {
+// Draw target circles
+function drawTarg(ctx, tx, ty, sx, sy) {
+    // Canvas
+    const w = ctx.canvas.width;
+    const h = ctx.canvas.height;
+
+    // Target conversion
+    const px = w/2 + tx - sx;
+    const py = h/2 - ty + sy;
+
+    ctx.save();
     // CIRCLE
     ctx.beginPath();
-    ctx.strokeStyle = COLOR.orange;
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([5, 5]);
-    ctx.arc(px, py, 30, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
+    ctx.strokeStyle = COLOR.orange; ctx.setLineDash([5, 5]);
+    ctx.arc(px, py, va / 2, 0, Math.PI * 2); ctx.stroke();
+    
     // DIAMOND
-    const ds = 8;
-    ctx.beginPath();
+    const ds = 8; ctx.beginPath();
     ctx.moveTo(px, py - ds);
     ctx.lineTo(px + ds, py);
     ctx.lineTo(px, py + ds);
     ctx.lineTo(px - ds, py);
-    ctx.closePath();
-    ctx.fillStyle = COLOR.gold;
-    ctx.fill();
+    ctx.fillStyle = COLOR.gold; ctx.fill();
+
+    ctx.restore();
 };
 
 // save current canvas
@@ -158,10 +146,10 @@ function drawTarg(ctx, px, py) {
 // drawDetails
 // restore
 
-// Works as intended
-function drawBody(ctx, x, y, psi) {
+// Draw body of blimp
+function drawBody(ctx, psi) {
     ctx.save();
-    ctx.translate(x, y);
+    ctx.translate(ctx.canvas.width / 2, ctx.canvas.height / 2);
     ctx == ctxTop && ctx.rotate(psi);
 
     let length = va;
@@ -171,8 +159,6 @@ function drawBody(ctx, x, y, psi) {
     ctx.ellipse(0, 0, length, vb, 0, 0, Math.PI * 2);
     ctx.fillStyle = COLOR.body;
     ctx.fill();
-    ctx.strokeStyle = COLOR.grn;
-    ctx.lineWidth = 2;
     ctx.stroke();
 
     ctx == ctxTop && drawDetailsTop();
@@ -183,6 +169,7 @@ function drawBody(ctx, x, y, psi) {
 
 // Works as intended
 function drawDetailsTop() {
+    ctxTop.save();
     // Nose highlight
     ctxTop.beginPath();
 
@@ -195,9 +182,9 @@ function drawDetailsTop() {
     ctxTop.fillStyle = COLOR.nose;
     ctxTop.fill();
 
+    ctxTop.save();
     // Clip outside of blimp
     (() => {
-        ctxTop.save();
         ctxTop.beginPath();
         ctxTop.rect(-canvasTop.width, -canvasTop.height, canvasTop.width * 2, canvasTop.height * 2);
         ctxTop.ellipse(0, 0, va, vb, 0, 0, Math.PI * 2);
@@ -207,8 +194,6 @@ function drawDetailsTop() {
     // L/R fins
     ctxTop.fillStyle = COLOR.fin;
     ctxTop.lineCap = "round";
-    ctxTop.strokeStyle = COLOR.grn;
-    ctxTop.lineWidth = 1;
 
     ctxTop.beginPath();
     ctxTop.moveTo(-22, -vb);
@@ -224,8 +209,7 @@ function drawDetailsTop() {
 
     ctxTop.fill();
     ctxTop.stroke();
-
-    ctxTop.restore();
+    ctxTop.restore(); // Ends clip outside of blimp
 
     // Top fin
     ctxTop.beginPath();
@@ -236,6 +220,8 @@ function drawDetailsTop() {
     ctxTop.lineTo(-22, 3);
     ctxTop.lineWidth = 2.75;
     ctxTop.stroke();
+
+    ctxTop.restore();
 }
 
 // WIP
@@ -274,7 +260,6 @@ function drawDetailsSide(angle) {
         ctxSide.closePath();
         ctxSide.fillStyle = COLOR.fin;
         ctxSide.fill();
-        ctxSide.strokeStyle = COLOR.grn;
         ctxSide.stroke();
     }
 
@@ -289,7 +274,7 @@ function drawDetailsSide(angle) {
     const noseRadY = vb * Math.sin(Math.PI/6); // Constant
     const noseLeftX = noseCenterX - noseRadX;
     const noseRightX = noseCenterX + noseRadX;
-
+        
     // Clip to blimp!
     (() => {
         ctxSide.save();

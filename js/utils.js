@@ -8,7 +8,7 @@ export const dist = (s, t) => ({
     dx: t.x - s.x,
     dy: t.y - s.y,
     dz: t.z - s.z,
-    brg: radToDeg(Math.atan2(t.y - s.y, t.x - s.x)),
+    brg: radToDeg(Math.atan2(s.y - t.y, s.x - t.x)),
     dist2D: Math.sqrt((t.x - s.x) ** 2 + (t.y - s.y) ** 2),
     dist3D: Math.sqrt((t.x - s.x) ** 2 + (t.y - s.y) ** 2 + (t.z - s.z) ** 2)
 })

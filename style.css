@@ -493,3 +493,13 @@ body {
         font-size: 0.8rem;
         color: var(--darkG);
     }
+
+    /* Flash overlay on capture */
+    #flash {
+      position: fixed; inset: 0;
+      background: var(--txt);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 999;
+      transition: opacity 0.05s;
+    }

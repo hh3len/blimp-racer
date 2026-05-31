@@ -39,7 +39,7 @@ export const P = {
 export function derivatives(s, inp) {
     return {
         dx: s.u * Math.cos(s.psi),
-        dy: s.u * Math.sin(s.psi),
+        dy: -s.u * Math.sin(s.psi),
         dz: s.w,
         dpsi: s.r, 
         du: (inp.Fx - P.Xu * s.u) / P.m_surge,
