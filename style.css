@@ -497,7 +497,7 @@ body {
     /* Flash overlay on capture */
     #flash {
       position: fixed; inset: 0;
-      background: var(--txt);
+      background: var(--G);
       opacity: 0;
       pointer-events: none;
       z-index: 999;

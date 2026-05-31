@@ -15,7 +15,7 @@ export function rootLayout(activePage) {
 
     const footer = document.createElement('footer');
     footer.innerHTML = `
-        <span>AIRSHIP FLIGHT SIMULATOR v0.11.38</span>
+        <span>AIRSHIP FLIGHT SIMULATOR v0.11.57</span>
         <span>H. LING</span>
     `;
     document.body.append(footer);
