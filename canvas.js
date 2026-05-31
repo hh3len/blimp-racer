@@ -18,10 +18,10 @@ function resizeCanvases() {
 window.addEventListener('resize', resizeCanvases);
 resizeCanvases();
 
-// World-to-canvas coordinate convention:
-// canvas_x =  world_x * SCALE 
-// canvas_y = -world_y * SCALE (Flip y)
-// canvas_z = -world_z * SCALE (Flip z)
+// CONVERSION STEPS:
+// Canvas-relative origin = (w/2, h/2)
+// Canvas-relative point of interest = (w/2 + tx, h/2 - ty)
+// Entire canvas shift due to ship motion = ((w/2 + tx) - sx, (h/2 - ty) + sy)
 
 // Convert m -> px
 const va = P.a * P.SCALE;
@@ -134,7 +134,6 @@ function drawTrail(ctx, sx, sy, trailX, trailY) {
 
     ctx.save();
     ctx.strokeStyle = COLOR.grn + '80'; //opacity
-    ctx.setLineDash([8, 8]);
     ctx.beginPath();
 
     for (let i = 0; i < x.length; i++) {
