@@ -46,7 +46,7 @@ export function updateSB(game, state, target, thrust) {
     E.brg.textContent = U.format(delta.brg) + '°';
 
     // SCORE
-    E.score.textContent = game.score;
+    E.score.textContent = game.score + '/' + game.level;
     
     // SYSTEM
     if (game.timerStarted) {

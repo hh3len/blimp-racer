@@ -18,7 +18,7 @@ if (!levelConfig) {
 
 // Stores global x/y/z position [m], heading [rad], surge/heave/yaw velocity [m/s]
 const newState = () => ({ x: 0.0, y: 0.0, z: 1.0, psi: 0.0, u: 0.0, w: 0.0, r: 0.0 });
-const newGame = () => ({ timerStarted: false, startTime: null, score: 0, trailX: [], trailY: [], trailZ: [], frame: 0 }); // Timer, score, and display variables
+const newGame = () => ({ level: LEVEL.scoreToWin, timerStarted: false, startTime: null, score: 0, trailX: [], trailY: [], trailZ: [], frame: 0 }); // Timer, score, and display variables
 const newTarget = () => ({ x: (Math.random() - 0.5) * 6, y: (Math.random() - 0.5) * 6, z: Math.random() * 3 + 0.5 }); // Target position
 
 // Initialize variables
@@ -101,8 +101,8 @@ function mainLoop(timestamp) {
 
     // Capture & win check
     if (U.dist(S, T).dist3D < P.CAPTURE_RAD) {
-        G.score++; triggerFlash();
-        if (G.score >= LEVEL.scoreToWin) { onLevelComplete(); return; }
+        G.score++; triggerFlash(); 
+        setTimeout(() => { if (G.score >= LEVEL.scoreToWin) { onLevelComplete(); return; }}, 1);
         T = newTarget(); 
     }
 
