@@ -1,11 +1,24 @@
-import {P, derivatives, rk4} from './physics.js';
+import { P, derivatives, rk4 } from './physics.js';
+import { LEVELS } from './levels.js';
 import * as U from './utils.js';
 import * as CV from './canvas.js';
 import * as SB from './sidebar.js';
 
+// Resolves from /play/01 -> "01", etc.
+// Falls back to "01" if run from game.html directly (local dev)
+const segments = window.location.pathname.split('/').filter(Boolean);
+const levelId = segments[1] ?? '01';
+const LEVEL = LEVELS[levelId] ?? LEVELS['01'];
+
+const levelConfig = LEVELS[levelId];
+if (!levelConfig) {
+  console.error(`Unknown level: ${levelId}`);
+  window.location.href = '/levels.html';
+}
+
 // Stores global x/y/z position [m], heading [rad], surge/heave/yaw velocity [m/s]
 const newState = () => ({ x: 0.0, y: 0.0, z: 1.0, psi: 0.0, u: 0.0, w: 0.0, r: 0.0 });
-const newGame = () => ({ timerStarted: false, startTime: null, score: 0, captured: false, trailX: [], trailY: [], trailZ: [], frame: 0 }); // Timer, score, captured, and display variables
+const newGame = () => ({ timerStarted: false, startTime: null, score: 0, trailX: [], trailY: [], trailZ: [], frame: 0 }); // Timer, score, and display variables
 const newTarget = () => ({ x: (Math.random() - 0.5) * 6, y: (Math.random() - 0.5) * 6, z: Math.random() * 3 + 0.5 }); // Target position
 
 // Initialize variables
@@ -17,6 +30,13 @@ function reset() { S = newState(); G = newGame(); T = newTarget(); }; // Resets 
 function triggerFlash() {
  const el = document.getElementById('flash'); 
  el.style.opacity = '0.25'; setTimeout(() => { el.style.opacity = '0'; }, 100);
+}
+
+function onLevelComplete() {
+  triggerFlash();
+  setTimeout(() => {
+    window.location.href = LEVEL.onComplete;
+  }, 1500);
 }
 
 // User-controlled inputs
@@ -79,9 +99,11 @@ function mainLoop(timestamp) {
     }
     G.frame++; // Update loop counter
 
-    // Capture check
+    // Capture & win check
     if (U.dist(S, T).dist3D < P.CAPTURE_RAD) {
-        G.score++; T = newTarget(); triggerFlash();
+        G.score++; triggerFlash();
+        if (G.score >= LEVEL.scoreToWin) { onLevelComplete(); return; }
+        T = newTarget(); 
     }
 
     CV.draw(G, S, T);
