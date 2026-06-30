@@ -2,7 +2,7 @@ export function insertLayout(activePage) {
     const nav = document.createElement('nav');
     nav.id = 'nav';
     nav.innerHTML = `
-        <a href="index.html" class="nav-logo">AMASS AIRSHIP // FLIGHT SIMULATOR </a>
+        <a href="/index.html" class="nav-logo">AMASS AIRSHIP // FLIGHT SIMULATOR </a>
         <div class="nav-links">
             <a href="/levels.html" class="${activePage === 'levels' ? 'active' : ''}">PLAY</a>
             <a href="/leaderboard.html" class="${activePage === 'leaderboard' ? 'active' : ''}">LEADERBOARD</a>
@@ -14,7 +14,7 @@ export function insertLayout(activePage) {
 
     const footer = document.createElement('footer');
     footer.innerHTML = `
-        <span>AIRSHIP FLIGHT SIMULATOR v0.11.61</span>
+        <span>AIRSHIP FLIGHT SIMULATOR v0.11.62</span>
         <span>H. LING</span>
     `;
     document.body.append(footer);
