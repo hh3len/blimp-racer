@@ -10,6 +10,15 @@ class StateDot:
     dx: float; dy: float; dz: float; dpsi: float
     du: float; dv: float; dw: float; dr: float
 
+@dataclass
+class Keys:
+    up: bool = False; down: bool = False
+    left: bool = False; right: bool = False
+
+@dataclass
+class Target:
+    x: float; y: float; z: float
+
 @dataclass(frozen=True)
 class Level:
     score_to_win: int
