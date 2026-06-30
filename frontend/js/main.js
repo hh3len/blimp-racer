@@ -1,11 +1,24 @@
-import {P, derivatives, rk4} from './physics.js';
+import { P, derivatives, rk4 } from './physics.js';
+import { LEVELS } from './levels.js';
 import * as U from './utils.js';
 import * as CV from './canvas.js';
 import * as SB from './sidebar.js';
 
+// Resolves from /play/01 -> "01", etc.
+// Falls back to "01" if run from game.html directly (local dev)
+const segments = window.location.pathname.split('/').filter(Boolean);
+const levelId = segments[1] ?? '01';
+const LEVEL = LEVELS[levelId] ?? LEVELS['01'];
+
+const levelConfig = LEVELS[levelId];
+if (!levelConfig) {
+  console.error(`Unknown level: ${levelId}`);
+  window.location.href = '/levels.html';
+}
+
 // Stores global x/y/z position [m], heading [rad], surge/heave/yaw velocity [m/s]
 const newState = () => ({ x: 0.0, y: 0.0, z: 1.0, psi: 0.0, u: 0.0, w: 0.0, r: 0.0 });
-const newGame = () => ({ timerStarted: false, startTime: null, score: 0, captured: false, trailX: [], trailY: [], trailZ: [], frame: 0 }); // Timer, score, captured, and display variables
+const newGame = () => ({ level: LEVEL.scoreToWin, timerStarted: false, startTime: null, score: 0, trailX: [], trailY: [], trailZ: [], frame: 0 }); // Timer, score, and display variables
 const newTarget = () => ({ x: (Math.random() - 0.5) * 6, y: (Math.random() - 0.5) * 6, z: Math.random() * 3 + 0.5 }); // Target position
 
 // Initialize variables
@@ -16,7 +29,14 @@ let T = newTarget();
 function reset() { S = newState(); G = newGame(); T = newTarget(); }; // Resets board
 function triggerFlash() {
  const el = document.getElementById('flash'); 
- el.style.opacity = '0.3'; setTimeout(() => { el.style.opacity = '0'; }, 120);
+ el.style.opacity = '0.25'; setTimeout(() => { el.style.opacity = '0'; }, 100);
+}
+
+function onLevelComplete() {
+  triggerFlash();
+  setTimeout(() => {
+    window.location.href = LEVEL.onComplete;
+  }, 1500);
 }
 
 // User-controlled inputs
@@ -46,20 +66,19 @@ document.addEventListener('keyup', e => {
     }
 });
 
-function mainLoop() {
+function mainLoop(timestamp) {
     const F1 = keys.left ? P.F_step : 0;
     const F2 = keys.right ? P.F_step : 0;
-    
-    // Up = positive Fz = positive dw = w increases = z increases = blimp rises & vice versa for down
-    const Fz = (keys.up ? P.F_step_v : 0) - (keys.down ? P.F_step_v : 0);
+    const Fz = (keys.up ? P.F_step_v : 0) - (keys.down ? P.F_step_v : 0); 
 
-    /* Fx (surge thrust)
+    // Motor thrust values (only used for visual display)
+    const thrust = { F1, F2, Fz };
+
+    /** Inputs used to compute derived state:
+     * Fx (surge thrust)
      * Mz (differential torque)
      * Fz (heave thrust) */
-    const I = {
-        F1, F2, Fx: Math.min(F1 + F2, P.F_max),
-        Mz: (F2 - F1) * P.ly, Fz
-    };
+    const I = { Fx: F1 + F2, Mz: (F1 - F2) * P.ly, Fz };
 
     // Compute & update state
     S = rk4(S, I);
@@ -76,22 +95,36 @@ function mainLoop() {
         if (G.trailX.length > 100) {
             G.trailX.shift(); G.trailY.shift(); G.trailZ.shift();
         }
+        G.frame = 0;
     }
+    G.frame++; // Update loop counter
 
-    // Check if ship is within capture radius
-    if (U.dist(S, T).dist < P.CAPTURE_RAD) {
-        G.score++;
-        T = newTarget();
-        triggerFlash();
+    // Capture & win check
+    if (U.dist(S, T).dist3D < P.CAPTURE_RAD) {
+        G.score++; triggerFlash(); 
+        setTimeout(() => { if (G.score >= LEVEL.scoreToWin) { onLevelComplete(); return; }}, 1);
+        T = newTarget(); 
     }
-
-    // Update frame count
-    G.frame++;
 
     CV.draw(G, S, T);
-    SB.updateSB(G, S, T, I);
+    SB.updateSB(G, S, T, thrust);
     requestAnimationFrame(mainLoop);
 }
 
-// Game loop
+let lastTime = 0, fpsAccum = 0, fpsCount = 0, fpsDisplay = 0;
+
+function timerLoop(timestamp) {
+ const dt = Math.min((timestamp - lastTime) / 1000, 0.05); // cap at 50ms
+ const E = document.getElementById('fps');
+ lastTime = timestamp; fpsAccum += dt; fpsCount++;
+
+ if (fpsAccum >= 0.5) { fpsDisplay = fpsCount / fpsAccum; fpsAccum = 0; fpsCount = 0; }
+
+ const fps = fpsCount % 100 === 0 ? '0' : fpsDisplay.toFixed(0); 
+ E.textContent = fps + ' FPS';
+
+ requestAnimationFrame(timerLoop);
+}
+
 requestAnimationFrame(mainLoop);
+requestAnimationFrame(timerLoop);

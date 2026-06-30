@@ -1,20 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8"/>
-  <title>Airship Racer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Play | AMASS Airship Sim</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&display=swap"/>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="/style.css"/>
 </head>
 
 <body>
   <div id="flash"></div>
-
-  <header>
-    <h1>AMASS AIRSHIP // INTERACTIVE SIM</h1>
-  </header>
-
   <div id="main">
     <div id="canvas">
       <div class="canvas-panel" data-label="TOP VIEW  (X–Y)">
@@ -33,9 +28,9 @@
             <div class="state-row"><span class="state-label">Y [m]</span> <span class="state-val" id="y">+0.00</span></div>
             <div class="state-row"><span class="state-label">Z [m]</span> <span class="state-val" id="z">+0.00</span></div>
             <div class="state-row"><span class="state-label">HEADING [°]</span> <span class="state-val" id="psi">+0.00</span></div>
-            <div class="state-row"><span class="state-label">U [m/s]</span> <span class="state-val" id="u">+0.00</span></div>
             <div class="state-row"><span class="state-label">W [m/s]</span> <span class="state-val" id="w">+0.00</span></div>
             <div class="state-row"><span class="state-label">R [m/s]</span> <span class="state-val" id="r">+0.00</span></div>
+            <div class="state-row"><span class="state-label">U [m/s]</span> <span class="state-val" id="u">+0.00</span></div>
       </div>
 
       <div class="disp-block">
@@ -69,17 +64,20 @@
 
       <div class="disp-block">
         <h3> SYSTEM </h3>
-        <div id="time-elapsed">T+00:00</div>
+          <div class="state-row">
+            <span class="system-stats" id="time">T+00:00</span>
+            <span class="system-stats" id="fps">-- FPS</span>
+          </div>
       </div>
     </div>
   </div>
 
-  <footer>
-    <span> AIRSHIP CONTROLLER SIM DEMO v10.47</span>
-    <span> H. LING </span>
-  </footer>
+  <script type="module">
+    import { insertLayout } from './js/layout.js';
+    insertLayout('game');
+  </script>
 
-  <script type="module" src="main.js"></script>
+  <script type="module" src="/js/main.js"></script>
 </body>
 
 </html>

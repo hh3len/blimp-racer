@@ -253,8 +253,8 @@ function drawDetailsSide(angle) {
         ctxSide.moveTo(p[0].px, p[0].py);
         p.shift();
 
-        for (let i in p) {
-            ctxSide.lineTo(p[i].px, p[i].py);
+        for (const pt of p) {
+            ctxSide.lineTo(pt.px, pt.py);
         }
 
         ctxSide.closePath();

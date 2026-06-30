@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title> Levels | AMASS Airship Sim</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&display=swap"/>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+
+<body>
+    <main id="levels">
+        <h2 class="levels-title">LEVEL SELECTION</h2>
+
+        <div class="levels-grid">
+
+            <a href="/play" class="level-card" data-number="00">
+                <span class="level-tag">TUTORIAL</span>
+                <div class="level-name">FREE FLIGHT</div>
+                <div class="level-desc">
+                    Learn to pilot the AMASS Lab's research blimp! Covers basic controls and gameplay.
+                </div>
+                <div class="level-features">
+                    <div class="level-feature">Untimed</div>
+                    <div class="level-feature">Unscored</div>
+                    <div class="level-feature">Infinite Retries</div>
+                </div>
+            </a>
+
+            <a href="/play/01" class="level-card" data-number="01">
+                <span class="level-tag">LEVEL</span>
+                <div class="level-name">BEGINNER</div>
+                <div class="level-desc">
+                    Follow a guided path through a series of checkpoints as fast as possible.
+                </div>
+                <div class="level-features">
+                    <div class="level-feature">Timed</div>
+                    <div class="level-feature">Simplified Scoring</div>
+                    <div class="level-feature">Stationary Targets</div>
+                </div>
+                <div class="level-best">
+                    BEST — <span id="best-easy">--:--</span>
+                </div>
+            </a>
+
+            <a href="/play/02" class="level-card" data-number="02">
+                <span class="level-tag">LEVEL</span>
+                <div class="level-name">INTERMEDIATE</div>
+                <div class="level-desc">
+                    Navigate to a series of checkpoints without guidance. You're on your own!
+                </div>
+                <div class="level-features">
+                    <div class="level-feature">Timed</div>
+                    <div class="level-feature">Scored</div>
+                    <div class="level-feature">Additional Challenges</div>
+                </div>
+                <div class="level-best">
+                    BEST — <span id="best-hard">--:--</span>
+                </div>
+            </a>
+
+            <a href="/play/03" class="level-card" data-number="03">
+                <span class="level-tag">LEVEL</span>
+                <div class="level-name">CHALLENGE</div>
+                <div class="level-desc">
+                    Follow an autonomous leader blimp through a series of twists and turns!
+                </div>
+                <div class="level-features">
+                    <div class="level-feature">Timed</div>
+                    <div class="level-feature">Scored</div>
+                    <div class="level-feature">Most Challenging</div>
+                </div>
+                <div class="level-best">
+                    BEST — <span id="best-challenge">--:--</span>
+                </div>
+            </a>
+        </div>
+    </main>
+
+    <script type="module">
+        import { insertLayout } from './js/layout.js';
+        insertLayout('levels');
+    </script>
+</body>
+</html>
