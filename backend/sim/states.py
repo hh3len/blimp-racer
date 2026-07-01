@@ -1,4 +1,8 @@
+import random as R
 from dataclasses import dataclass, field
+from constants import Level
+
+__all__ = ["State", "StateDot", "ControlInputs", "Keys", "Target", "Game"]
 
 @dataclass
 class State:
@@ -11,18 +15,17 @@ class StateDot:
     du: float; dv: float; dw: float; dr: float
 
 @dataclass
+class ControlInputs:
+    Fx: float; Mz: float; Fz: float
+
+@dataclass
 class Keys:
     up: bool = False; down: bool = False
     left: bool = False; right: bool = False
 
 @dataclass
 class Target:
-    x: float; y: float; z: float
-
-@dataclass(frozen=True)
-class Level:
-    score_to_win: int
-    on_complete: str
+    x: float = R.random() - 0.5 * 6; y: float = R.random() - 0.5 * 6; z: float = R.random() * 3 + 0.5
 
 @dataclass
 class Game:

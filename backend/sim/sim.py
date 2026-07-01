@@ -1,7 +1,6 @@
 from dataclasses import dataclass
-import random
 
-from models import State, Game, Level, Target, Keys
+from states import ControlInputs, State, Game, Level, Target, Keys
 from physics import rk4
 from utils import wrap, dist3D
 import constants as P
@@ -9,24 +8,23 @@ import constants as P
 class Simulator:
     def __init__(self, level: Level):
         self.level = level
-        self.G = Game(level=level)
-
+        self.G = Game(self.level)
         self.S = State()
         self.T = Target()
 
     # MAIN LOOP
-    def step(self, inp: Keys):
-        Fx_left = P.F_step if inp.left else 0.0
-        Fx_right = P.F_step if inp.right else 0.0
+    def step(self, keypress: Keys):
+        Fx_left = P.F_step if keypress.left else 0.0
+        Fx_right = P.F_step if keypress.right else 0.0
 
-        Fz = ((P.F_step_v if inp.up else 0.0)
-            - (P.F_step_v if inp.down else 0.0))
+        Fz = ((P.F_step_v if keypress.up else 0.0)
+            - (P.F_step_v if keypress.down else 0.0))
 
-        controlInputs = {
-            "Fx": Fx_left + Fx_right,
-            "Mz": (Fx_left - Fx_right) * P.ly,
-            "Fz": Fz
-        }
+        controlInputs = ControlInputs(
+            Fx = Fx_left + Fx_right,
+            Mz = (Fx_left - Fx_right) * P.ly,
+            Fz = Fz
+        )
 
         # Update state
         self.S = rk4(self.S, controlInputs)
@@ -45,7 +43,7 @@ class Simulator:
         # Capture & win check
         if dist3D(self.S, self.T) < P.CAPTURE_RAD:
             self.G.score += 1
-            self.T = self._new_target()
+            self.T = Target()
 
             if self.G.score >= self.level.score_to_win:
                 self.G.timer_started = False
@@ -67,13 +65,6 @@ class Simulator:
             
             self.G.frame = 0
         self.G.frame += 1
-
-    def _new_target(self):
-        return Target(
-            x=(random.random() - 0.5) * 6,
-            y=(random.random() - 0.5) * 6,
-            z=random.random() * 3 + 0.5
-        )
 
     # OUTPUT
     def serialize(self):
