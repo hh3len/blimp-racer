@@ -5,11 +5,13 @@
 export const P = {
     // Mass coefficients
     m_surge: 0.460 + 0.1091, // effective surge mass [kg]
+    m_sway: 0.460 + 0.3120, // effective sway mass [kg]
     m_heave: 0.460 + 0.3120, // effective heave mass [kg]
     Iz: 0.0873 + 0.0197, // effective yaw inertia [kg*m^2]
 
     // Damping coefficients
     Xu: 0.1900, // surge damping [kg/s]
+    Yv: 0.7520, // sway damping [kg/s]
     Zw: 0.3366, // heave damping [kg/s]
     Nr: 0.2450, // yaw damping [kg*m^2/s]
     ly: 0.461, // lateral motor moment arm [m]
@@ -28,23 +30,25 @@ export const P = {
 };
 
 /** Compute rates of change for each state variable:
- * dx (global X velocity) = surge * cos(heading)
- * dy (global Y velocity) = surge * sin(heading)
- * dz (global Z velocity) = heave
+ * dx (global X velocity, + is right) = surge * cos(heading) - sway * sin(heading)
+ * dy (global Y velocity, + is forward) = -surge * sin(heading) + sway * cos(heading)
+ * dz (global Z velocity, + is down) = heave
  * dpsi = yaw velocity
  * du (surge acceleration) = (thrust - drag) / mass
+ * dv (sway acceleration) = (drag) / mass
  * dw (heave acceleration) = (thrust - drag) / mass
  * dr (yaw acceleration) = (torque - drag) / inertia
 */
-export function derivatives(s, inp) {
+export function derivatives(S, U) {
     return {
-        dx: s.u * Math.cos(s.psi),
-        dy: -s.u * Math.sin(s.psi),
-        dz: s.w,
-        dpsi: s.r, 
-        du: (inp.Fx - P.Xu * s.u) / P.m_surge,
-        dw: (inp.Fz - P.Zw * s.w) / P.m_heave,
-        dr: (inp.Mz - P.Nr * s.r) / P.Iz,
+        dx: S.u * Math.cos(S.psi) - S.v * Math.sin(S.psi),
+        dy: -S.u * Math.sin(S.psi) + S.v * Math.cos(S.psi),
+        dz: S.w,
+        dpsi: S.r, 
+        du: (U.Fx - P.Xu * S.u + P.m_sway * S.v * S.r) / P.m_surge,
+        dv: (-P.Yv * S.v - P.m_surge * S.u * S.r) / P.m_sway,
+        dw: (U.Fz - P.Zw * S.w) / P.m_heave,
+        dr: (U.Mz - P.Nr * S.r) / P.Iz,
     };
 }
 
@@ -57,6 +61,7 @@ export function rk4(s, inp, dt = 0.025) {
         z: s.z + t * d.dz,
         psi: s.psi + t * d.dpsi,
         u: s.u + t * d.du,
+        v: s.v + t * d.dv,
         w: s.w + t * d.dw,
         r: s.r + t * d.dr,
     });
@@ -72,6 +77,7 @@ export function rk4(s, inp, dt = 0.025) {
         dz: (k1.dz + 2*k2.dz + 2*k3.dz + k4.dz) / 6,
         dpsi: (k1.dpsi + 2*k2.dpsi + 2*k3.dpsi + k4.dpsi) / 6,
         du: (k1.du + 2*k2.du + 2*k3.du + k4.du) / 6,
+        dv: (k1.dv + 2*k2.dv + 2*k3.dv + k4.dv) / 6,
         dw: (k1.dw + 2*k2.dw + 2*k3.dw + k4.dw) / 6,
         dr: (k1.dr + 2*k2.dr + 2*k3.dr + k4.dr) / 6,
     }, dt);

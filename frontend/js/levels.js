@@ -1,18 +1,17 @@
 export const LEVELS = {
-  "tutorial": {
+  "tut": {
     scoreToWin: 1,
-    onComplete: "/levels.html",
   },
   "01": {
     scoreToWin: 3,
-    onComplete: "/levels.html",
+    mode: "capture",
   },
   "02": {
-    scoreToWin: 8,
-    onComplete: "/levels.html",
+    scoreToWin: null,
+    mode: "follow",
   },
   "03": {
-    scoreToWin: 12,
-    onComplete: "/levels.html",
+    scoreToWin: null,
+    mode: "follow",
   },
 };

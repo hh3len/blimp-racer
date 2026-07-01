@@ -27,7 +27,7 @@ resizeCanvases();
 const va = P.a * P.SCALE;
 const vb = P.b * P.SCALE;
 
-export function draw(game, state, target) {
+export function draw(game, state, target, leader = null) {
     // Convert m -> px
     const sx = state.x * P.SCALE; const sy = state.y * P.SCALE; const sz = state.z * P.SCALE;
     const tx = target.x * P.SCALE; const ty = target.y * P.SCALE; const tz = target.z * P.SCALE;
@@ -41,17 +41,32 @@ export function draw(game, state, target) {
     let clearCanvas = ctx => { ctx.save(); ctx.fillStyle = COLOR.bg; ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height); ctx.restore(); };
     clearCanvas(ctxTop); clearCanvas(ctxSide);
 
-    // ENVIRONMENT (grid, origin, ground, trail)
-    drawEnv(ctxTop, sx, sy, trailX, trailY); drawEnv(ctxSide, sx, sz, trailX, trailZ);
+    // ENVIRONMENT (grid, origin, ground)
+    drawEnv(ctxTop, sx, sy); drawEnv(ctxSide, sx, sz);
 
-    // TARGET
-    drawTarg(ctxTop, tx, ty, sx, sy); drawTarg(ctxSide, tx, tz, sx, sz);
-    
+    // LEADER
+    if (leader) {
+        const lsx = leader.x * P.SCALE; 
+        const lsy = leader.y * P.SCALE; 
+        const lsz = leader.z * P.SCALE;
+        
+        drawTrail(ctxTop, game.trailX, game.trailY, lsx, lsy, COLOR.orange);
+        drawTrail(ctxSide, game.trailX, game.trailZ, lsx, lsz, COLOR.orange);
+        
+        drawBody(ctxTop, leader.psi);
+        drawBody(ctxSide, leader.psi);
+    } else { // TARGET
+        drawTarg(ctxTop, tx, ty, sx, sy); drawTarg(ctxSide, tx, tz, sx, sz);
+    }
+
     // BLIMP
+    drawTrail(ctxTop, trailX, trailY, sx, sy, COLOR.grn);
+    drawTrail(ctxSide, trailX, trailZ, sx, sz, COLOR.grn);
+    
     drawBody(ctxTop, state.psi); drawBody(ctxSide, state.psi);
 }
 
-function drawEnv(ctx, sx, sy, trailX, trailY, spacing = va) {
+function drawEnv(ctx, sx, sy, spacing = va) {
     // Canvas
     const w = ctx.canvas.width;
     const h = ctx.canvas.height;
@@ -96,21 +111,24 @@ function drawEnv(ctx, sx, sy, trailX, trailY, spacing = va) {
         }
         ctx.restore();
     }) ();
-
-    // Draw disappearing trail
-    (() => {
-        // Convert trail m -> px and translate by canvas origin
-        const x = trailX.map(i => w/2 + i * P.SCALE);
-        const y = trailY.map(i => h/2 - i * P.SCALE);
-
-        ctx.save(); ctx.beginPath(); ctx.strokeStyle = COLOR.grn + '80'; //opacity
-        for (let i = 0; i < x.length; i++) {
-            const p = { px: x[i] - sx, py: y[i] + sy};
-            i === 0 ? ctx.moveTo(p.px,p.py) : ctx.lineTo(p.px,p.py);
-        }
-        ctx.stroke(); ctx.restore();
-    }) ();
 };
+
+function drawTrail(ctx, trailX, trailY, sx, sy, color) {
+    // Canvas
+    const w = ctx.canvas.width;
+    const h = ctx.canvas.height;
+
+    // Convert trail m -> px and translate by canvas origin
+    const x = trailX.map(i => w/2 + i * P.SCALE);
+    const y = trailY.map(i => h/2 - i * P.SCALE);
+
+    ctx.save(); ctx.beginPath(); ctx.strokeStyle = color + '80'; //opacity
+    for (let i = 0; i < x.length; i++) {
+        const p = { px: x[i] - sx, py: y[i] + sy};
+        i === 0 ? ctx.moveTo(p.px,p.py) : ctx.lineTo(p.px,p.py);
+    }
+    ctx.stroke(); ctx.restore();
+}
 
 // Draw target circles
 function drawTarg(ctx, tx, ty, sx, sy) {

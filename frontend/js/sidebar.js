@@ -8,6 +8,7 @@ const E = {
     z: document.getElementById('z'),
     psi: document.getElementById('psi'),
     u: document.getElementById('u'),
+    v: document.getElementById('v'),
     w: document.getElementById('w'),
     r: document.getElementById('r'),
 
@@ -23,20 +24,21 @@ const E = {
     timer: document.getElementById('time'),
 };
 
-export function updateSB(game, state, target, thrust) {
+export function updateSB(game, state, target) {
     // VEHICLE
     E.x.textContent = U.format(state.x);
     E.y.textContent = U.format(state.y);
     E.z.textContent = U.format(state.z);
     E.psi.textContent = U.format(U.radToDeg(state.psi)) + '°';
     E.u.textContent = U.format(state.u);
+    E.v.textContent = U.format(state.v);
     E.w.textContent = U.format(state.w);
     E.r.textContent = U.format(state.r);
 
     // MOTORS
-    E.m1.style.width = Math.min(thrust.F1 / P.F_max, 1) * 100 + '%';
-    E.m2.style.width = Math.min(thrust.F2 / P.F_max, 1) * 100 + '%';
-    E.m3.style.width = Math.min(Math.abs(thrust.Fz) / P.F_max, 1) * 100 + '%';
+    E.m1.style.width = Math.min(game.thrust.F1 / P.F_max, 1) * 100 + '%';
+    E.m2.style.width = Math.min(game.thrust.F2 / P.F_max, 1) * 100 + '%';
+    E.m3.style.width = Math.min(Math.abs(game.thrust.Fz) / P.F_max, 1) * 100 + '%';
 
     // TARGET
     const delta = U.dist(state, target);
@@ -46,7 +48,13 @@ export function updateSB(game, state, target, thrust) {
     E.brg.textContent = U.format(delta.brg) + '°';
 
     // SCORE
-    E.score.textContent = game.score + '/' + game.level;
+    E.score.textContent = game.score + '/' + game.scoreToWin;
+
+    if (game.mode === 'capture') {
+        E.score.textContent = game.score + '/' + game.scoreToWin;
+    } else {
+        E.score.textContent = 0;
+    }
     
     // SYSTEM
     if (game.timerStarted) {

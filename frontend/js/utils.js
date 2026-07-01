@@ -13,6 +13,9 @@ export const dist = (s, t) => ({
     dist3D: Math.hypot(t.x - s.x, t.y - s.y, t.z - s.z)
 })
 
+// Wrap angle to [-pi, pi]
+export const wrapAngle = a => ((a + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
+
 // Radians to degrees unit conversion
 export const radToDeg = rad => rad * 180 / Math.PI;
 
